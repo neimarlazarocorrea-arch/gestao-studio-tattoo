@@ -24,7 +24,7 @@ module.exports = function apiContractMiddleware(req, res, next) {
       return originalJson(payload);
     }
 
-    // Respect payloads that already follow contract.
+    // Respeita payloads que ja seguem o contrato.
     if (isObject(payload) && Object.prototype.hasOwnProperty.call(payload, 'ok')) {
       return originalJson(payload);
     }

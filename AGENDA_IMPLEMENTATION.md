@@ -1,149 +1,121 @@
-## ✅ Módulo AGENDA - Implementação Completa
+# Modulo Agenda - Implementacao
 
-### 📋 Checklist de Implementação
+## Visao geral
 
-#### Backend (Express + SQLite)
-- [x] Schema SQL: tabela `appointments` + índices em `db/schema.sql`
-- [x] Service: `services/appointmentService.js` com list(opts), upcoming(days), countToday(), CRUD
-- [x] Controller: `controllers/appointmentController.js` com validações e resposta {ok, data}
-- [x] Routes: `routes/appointments.js` com rotas nomeadas primeiro (upcoming, today-count)
-- [x] Server: registrado em `server.js` com GET /agenda para servir HTML
+Este documento descreve o modulo Agenda por blocos funcionais.
+Cada bloco explica o que foi implementado, onde esta no codigo e como validar.
 
-#### Frontend
-- [x] Página separada: `public/agenda.html` com form, tabela e filtros
-- [x] JS externo: `public/js/agenda.js` com CRUD completo
-- [x] Integração: Carrega clientes via /api/clients para select
-- [x] Filtros: Hoje, Próximos 7 dias, Todos
-- [x] Ações: Editar, Excluir, Marcar como Concluído (status=done)
+## Bloco 1: Base de dados
 
-#### Dashboard/Resumo
-- [x] Atualizado: Mostra Hoje: Y, Próximos(7d): Z
-- [x] Summary Service: Calcula todayCount e retorna em {ok, data}
-- [x] Summary Controller: Retorna {ok: true, data: {...}}
+Objetivo:
+- guardar agendamentos com dados de cliente, data, hora, servico, preco e estado.
 
----
+Implementacao:
+- tabela `appointments` em `db/schema.sql`;
+- indices para consultas mais frequentes (por data, estado e relacoes).
 
-### 🧪 Testes (Thunder Client / Postman)
+## Bloco 2: Service (regra de negocio)
 
-#### 1️⃣ Criar agendamento
-```
-POST http://localhost:3000/api/appointments
-Content-Type: application/json
+Objetivo:
+- centralizar as regras da Agenda fora do controller.
 
-{
-  "client_id": 1,
-  "date": "2026-03-10",
-  "time": "14:00",
-  "service": "Fechamento",
-  "price": 150,
-  "status": "scheduled",
-  "notes": "Cliente confirmado"
-}
-```
-Esperado: `{ok: true, data: {id: 1, client_id: 1, ...}}`
+Implementacao:
+- `services/appointmentService.js` com:
+  - listagem com filtros;
+  - CRUD completo;
+  - proximos dias (`upcoming`);
+  - contagem de hoje (`countToday`);
+  - conclusao de sessao e ligacao a fluxo financeiro/OS quando aplicavel.
 
-#### 2️⃣ Listar próximos 7 dias
-```
-GET http://localhost:3000/api/appointments/upcoming?days=7
-```
-Esperado: `{ok: true, data: [...]}`
+## Bloco 3: Controller (camada HTTP)
 
-#### 3️⃣ Contar agendamentos de hoje
-```
-GET http://localhost:3000/api/appointments/today-count
-```
-Esperado: `{ok: true, data: 0}` (ou N se houver)
+Objetivo:
+- validar pedidos e devolver respostas no contrato da API.
 
-#### 4️⃣ Resumo completo
-```
-GET http://localhost:3000/api/summary
-```
-Esperado:
-```json
-{
-  "ok": true,
-  "data": {
-    "totalClients": 1,
-    "todayCount": 0,
-    "upcomingAppointments": [...],
-    "lowStock": [],
-    "balance": 0
-  }
-}
-```
+Implementacao:
+- `controllers/appointmentController.js`:
+  - valida campos obrigatorios;
+  - chama service;
+  - devolve sucesso/erro no formato esperado.
 
----
+## Bloco 4: Rotas
 
-### 🌐 Browser
+Objetivo:
+- expor endpoints da Agenda com ordem correta de rotas.
 
-1. Ir a **http://localhost:3000/** → Home (Dashboard)
-   - Deve mostrar: "Clientes: X, Hoje: Y, Próximos(7d): Z, ..."
+Implementacao:
+- `routes/appointments.js`:
+  - rotas nomeadas primeiro (`upcoming`, `today-count`);
+  - rotas por id depois (`:id`).
 
-2. Clicar em **Agenda**
-   - Abre `http://localhost:3000/agenda`
-   - Form com Cliente (select), Data, Hora, Serviço, Preço, Status, Observações
-   - Botão "Salvar" + "Cancelar"
-   - Tabela abaixo mostrando agendamentos filtrados (padrão: Próximos 7 dias)
-   - Ações: Editar, Excluir, Concluir
+## Bloco 5: Integracao no servidor
 
-3. **Testar CRUD**
-   - Preencher form → Salvar → Aparece na tabela
-   - Editar → Form preenchido → PUT /api/appointments/{id}
-   - Excluir → DELETE /api/appointments/{id}
-   - Marcar as Concluído → Status muda para "done"
+Objetivo:
+- servir a pagina da Agenda e manter API ativa.
 
----
+Implementacao:
+- registo de rotas no servidor;
+- endpoint/pagina `GET /agenda` para abrir `public/agenda.html`.
 
-### 📁 Arquivos Criados/Modificados
+## Bloco 6: Frontend da Agenda
 
-#### Criados:
-- `db/schema.sql` (aprimorado com indexes)
-- `public/agenda.html`
-- `public/js/agenda.js`
+Objetivo:
+- permitir operacao diaria sem sair da pagina.
 
-#### Modificados:
-- `services/appointmentService.js` (adicionado filters, upcoming, countToday)
-- `controllers/appointmentController.js` (validações, {ok, data})
-- `routes/appointments.js` (order: named routes first)
-- `services/summaryService.js` (adicionado todayCount)
-- `controllers/summaryController.js` (resposta {ok, data})
-- `server.js` (adicionado GET /agenda)
-- `public/index.html` (removido form appts, atualizado summary)
+Implementacao:
+- `public/agenda.html` com formulario, tabela e filtros;
+- `public/js/agenda.js` com:
+  - carregar clientes e orcamentos;
+  - criar, editar, eliminar e concluir agendamentos;
+  - atualizar tabela por filtros (hoje, proximos dias, todos);
+  - sincronizar estado com autenticacao da API.
 
----
+## Bloco 7: Ligacao ao painel/resumo
 
-### 🚀 Para Iniciar
+Objetivo:
+- refletir informacao da Agenda no dashboard principal.
 
-```bash
-cd c:\DEV\repos\tattoo-gestao-pro
-npm run dev  # ou npm start
-```
+Implementacao:
+- `services/summaryService.js` calcula indicadores da agenda;
+- `controllers/summaryController.js` devolve dados para o painel;
+- `public/index.html` apresenta os indicadores.
 
-Navegador: http://localhost:3000
+## Bloco 8: Contrato de API
 
----
+Objetivo:
+- padronizar respostas para facilitar frontend e testes.
 
-### ⚙️ API Endpoints Disponíveis
+Formato:
+- sucesso: `{ ok: true, data: ... }`
+- erro: `{ ok: false, error: "..." }`
 
-```
-GET    /api/appointments              (lista com filtros)
-POST   /api/appointments              (criar)
-GET    /api/appointments/:id           (obter)
-PUT    /api/appointments/:id           (editar)
-DELETE /api/appointments/:id           (excluir)
-GET    /api/appointments/upcoming?days=7  (próximos N dias)
-GET    /api/appointments/today-count   (count de hoje)
-GET    /api/summary                   (resumo completo)
-GET    /agenda                        (página HTML para agenda)
-```
+## Bloco 9: Testes de validacao
 
----
+Testes manuais sugeridos:
+1. criar agendamento valido;
+2. listar proximos 7 dias;
+3. contar agendamentos de hoje;
+4. editar e concluir agendamento;
+5. eliminar agendamento;
+6. confirmar resposta correta para erros de validacao.
 
-### 💡 Notas
+Teste automatizado:
+- `npm run smoke:e2e` (inclui fluxo da Agenda no conjunto de regressao).
 
-- Datas em ISO format (YYYY-MM-DD), horas em HH:MM
-- Validação: client_id, date, time, service obrigatórios no backend
-- Status padrão: 'scheduled' (scheduled | done | canceled)
-- JS movido para `/public/js/agenda.js` para evitar CSP issues
-- Respostas padronizadas: `{ok: true/false, data: ..., error: ...}`
-- Banco SQLite local em `db/tattoo.db`
+## Bloco 10: Endpoints da Agenda
+
+- `GET /api/appointments`
+- `POST /api/appointments`
+- `GET /api/appointments/:id`
+- `PUT /api/appointments/:id`
+- `DELETE /api/appointments/:id`
+- `GET /api/appointments/upcoming?days=7`
+- `GET /api/appointments/today-count`
+- `GET /agenda`
+
+## Bloco 11: Observacoes operacionais
+
+- datas no formato `YYYY-MM-DD`;
+- horas no formato `HH:MM`;
+- estado padrao de novo agendamento: `scheduled`;
+- manter validacao por smoke test apos alteracoes relevantes.

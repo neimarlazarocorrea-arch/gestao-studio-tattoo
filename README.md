@@ -1,60 +1,72 @@
 # Tattoo Gestao Pro
 
-Sistema de gestao para estudio de tatuagem (Node.js + Express + SQLite + frontend estatico).
+Sistema de gestao para estudio de tatuagem com backend Node.js/Express, base de dados SQLite e frontend estatico.
+
+## Objetivo do projeto
+
+Este sistema cobre os blocos operacionais principais de um estudio:
+- clientes;
+- orcamentos;
+- agenda;
+- ordens de servico;
+- transacoes e recibos;
+- relatorios e resumo gerencial.
 
 ## Requisitos
 
-- Node.js 18+
+- Node.js 18 ou superior
 - npm
 
-## Setup rapido
+## Configuracao rapida
 
 ```bash
 npm install
 npm start
 ```
 
-Aplicacao:
+Entradas principais da aplicacao:
 - Painel: `http://localhost:3000/`
 - Agenda: `http://localhost:3000/agenda`
 
 ## Variaveis de ambiente
 
-Use o arquivo `.env.example` como referencia.
+Use `.env.example` como referencia.
 
 Variaveis suportadas:
 - `PORT`: porta HTTP (padrao `3000`)
-- `CORS_ORIGIN`: lista de origens permitidas, separadas por virgula. Ex.: `http://localhost:3000,http://127.0.0.1:3000`
-- `AUTH_ENABLED`: habilita autenticacao Basic nas rotas `/api/*` (`true`/`false`)
-- `AUTH_USERS`: usuarios no formato `usuario:senha:perfil`, separados por virgula
+- `CORS_ORIGIN`: lista de origens permitidas, separadas por virgula
+- `AUTH_ENABLED`: ativa autenticacao Basic nas rotas `/api/*` (`true`/`false`)
+- `AUTH_USERS`: utilizadores no formato `utilizador:senha:perfil`, separados por virgula
 
-Exemplo de `AUTH_USERS`:
-- `admin:senha123:admin,operador:senha456:operator`
+Exemplo:
+- `AUTH_USERS=admin:senha123:admin,operador:senha456:operator`
 
-## Autenticacao opcional (frontend)
+## Bloco de autenticacao (opcional)
 
 Quando `AUTH_ENABLED=true`:
-- O frontend exibe `Entrar API` / `Sair API` no painel e na agenda.
-- O login usa modal com validacao no servidor antes de salvar credenciais.
-- Se uma chamada API retornar `401`, o frontend pode solicitar login e refazer a requisicao uma vez.
+- o frontend apresenta `Entrar API` e `Sair API` no painel e na agenda;
+- o login e feito em modal, com validacao no servidor antes de gravar credenciais;
+- quando uma chamada devolve `401`, o frontend pode pedir autenticacao e repetir a requisicao uma unica vez.
 
-## Scripts uteis
+## Bloco de scripts operacionais
 
 ```bash
 npm run smoke:e2e      # regressao E2E principal
-npm run backup-db      # backup do SQLite em backups/
-npm run restore-db -- backups/arquivo.db
-npm run reset-db       # reset de banco (cuidado)
+npm run backup-db      # copia de seguranca do SQLite em backups/
+npm run restore-db -- backups/ficheiro.db
+npm run reset-db       # recriacao da base local (usar com cuidado)
 ```
 
-## Contrato de API
+## Bloco de contrato da API
 
-Rotas em `/api/*` seguem envelope padrao:
+As rotas em `/api/*` seguem envelope padrao:
 - sucesso: `{ "ok": true, "data": ... }`
 - erro: `{ "ok": false, "error": "..." }`
 
-## Observacoes de repositorio
+Este bloco facilita o tratamento uniforme de respostas no frontend.
 
-- `node_modules/` e `db/*.db` sao ignorados no git.
-- O schema fica em `db/schema.sql`.
-- Fluxos criticos devem ser validados com `npm run smoke:e2e`.
+## Bloco de repositorio
+
+- `node_modules/` e `db/*.db` estao ignorados no git;
+- o esquema principal esta em `db/schema.sql`;
+- alteracoes de backend/frontend devem ser validadas com `npm run smoke:e2e`.

@@ -252,7 +252,7 @@ function init() {
                                                         err8b.message
                                                       );
                                                     }
-                                                    // continue with sessions_completed
+                                                    // continua com a coluna sessions_completed
                                                     ensureColumn(
                                                       db,
                                                       'budgets',

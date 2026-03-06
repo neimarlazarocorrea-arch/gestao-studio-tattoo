@@ -427,7 +427,7 @@ async function cleanup() {
     try {
       await requestJson(`/api/appointments/${createdAppointmentId}`, { method: 'DELETE' });
     } catch {
-      // Ignore cleanup failures.
+      // Ignora falhas de limpeza.
     }
   }
 
@@ -435,7 +435,7 @@ async function cleanup() {
     try {
       await requestJson(`/api/appointments/${createdBudgetAppointmentId}`, { method: 'DELETE' });
     } catch {
-      // Ignore cleanup failures.
+      // Ignora falhas de limpeza.
     }
   }
 
@@ -443,7 +443,7 @@ async function cleanup() {
     try {
       await requestJson(`/api/budgets/${createdBudgetId}`, { method: 'DELETE' });
     } catch {
-      // Ignore cleanup failures.
+      // Ignora falhas de limpeza.
     }
   }
 

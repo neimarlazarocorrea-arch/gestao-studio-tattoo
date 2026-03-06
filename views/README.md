@@ -1,5 +1,7 @@
-# Views folder
+# Pasta views
 
-This directory is reserved for server-side templates or view files if the project evolves to use a templating engine (e.g., EJS, Pug).
+Este diretorio fica reservado para templates do lado do servidor, caso o projeto evolua para um motor de templates (por exemplo, EJS ou Pug).
 
-Currently the application serves static HTML from the `public` folder.
+Estado atual:
+- a aplicacao serve HTML estatico a partir de `public`;
+- por isso, esta pasta ainda nao e utilizada no fluxo principal.

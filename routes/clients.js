@@ -11,7 +11,7 @@ router.post('/', clientCtrl.createClient);
 router.get('/:id', clientCtrl.getClient);
 // PUT atualiza cliente por id
 router.put('/:id', clientCtrl.updateClient);
-// DELETE remove cliente por id
+// remove cliente por id
 router.delete('/:id', clientCtrl.deleteClient);
 
 module.exports = router; // exporta roteador

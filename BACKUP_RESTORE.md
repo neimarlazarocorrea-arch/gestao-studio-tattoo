@@ -1,6 +1,6 @@
-# Backup e Restore
+# Copia de Seguranca e Restauro
 
-## Backup do banco
+## Bloco de copia de seguranca
 
 Comando:
 
@@ -8,10 +8,11 @@ Comando:
 npm run backup-db
 ```
 
-Resultado:
-- Cria um arquivo em `backups/` com nome `tattoo-YYYYMMDD-HHMMSS.db`.
+Resultado esperado:
+- cria um ficheiro em `backups/` com nome no formato `tattoo-YYYYMMDD-HHMMSS.db`;
+- preserva um ponto de recuperacao antes de manutencoes mais arriscadas.
 
-## Restore do banco
+## Bloco de restauro
 
 Comando:
 
@@ -19,29 +20,27 @@ Comando:
 npm run restore-db -- backups/tattoo-YYYYMMDD-HHMMSS.db
 ```
 
-Observacoes:
-- O restore sobrescreve `db/tattoo.db`.
-- Pare o servidor antes de restaurar para evitar corrupcao.
+Comportamento:
+- o restauro substitui `db/tattoo.db` pelo ficheiro indicado;
+- deve parar o servidor antes do restauro para evitar corrupcao de dados.
 
-## Auditoria
+## Bloco de auditoria
 
-Acoes criticas sao registradas em `audit_logs`:
-- fechamento de orcamento
-- troca de status de OS
-- exclusao de agendamento
-- exclusao de transacao
-- update/delete de cliente
+As acoes criticas ficam registadas em `audit_logs` para rastreabilidade:
+- fecho de orcamento;
+- mudanca de estado de OS;
+- eliminacao de agendamento;
+- eliminacao de transacao;
+- alteracao/remocao de cliente.
 
-## Autenticacao opcional
+## Bloco de autenticacao opcional
 
-A autenticacao pode ser habilitada por variaveis de ambiente.
-
-Variaveis:
+Pode ativar autenticacao por variaveis de ambiente:
 - `AUTH_ENABLED=true`
 - `AUTH_USERS=admin:senha123:admin,operador:senha456:operator`
 
-Formato:
-- `usuario:senha:perfil`
-- perfis aceitos para escrita: `admin`, `operator`
+Formato de `AUTH_USERS`:
+- `utilizador:senha:perfil`
+- perfis com permissao de escrita: `admin`, `operator`
 
-Com autenticacao ativa, as rotas `/api/*` exigem `Authorization: Basic ...`.
+Com autenticacao ativa, as rotas `/api/*` exigem cabecalho `Authorization: Basic ...`.

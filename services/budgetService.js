@@ -93,14 +93,14 @@ function insertMaterials(budgetId, materials, callback) {
   let hasError = false;
   
   materials.forEach(mat => {
-    // if material_id provided attempt to fill item_name/unit_cost from master list
+    // se material_id for informado, tenta preencher item_name/unit_cost a partir da tabela materials
     if (mat.material_id && !mat.item_name) {
       db.get('SELECT name, unit_cost FROM materials WHERE id = ?', [mat.material_id], (errm, mrow) => {
         if (!errm && mrow) {
           mat.item_name = mrow.name;
           if (!mat.unit_cost || mat.unit_cost === 0) mat.unit_cost = mrow.unit_cost;
         }
-        // continue with insertion even if query failed or returned nothing
+        // continua a insercao mesmo que a consulta falhe ou nao retorne dados
         const sql = `INSERT INTO budget_materials (budget_id, item_name, quantity, unit_cost, material_id) VALUES (?,?,?,?,?)`;
         db.run(sql, [budgetId, mat.item_name, mat.quantity || 1, mat.unit_cost || 0, mat.material_id || null], finishRow);
       });
@@ -193,7 +193,7 @@ function recordPayment(budgetId, amount, callback) {
     const sql = `UPDATE budgets SET amount_paid = ?, status = ? WHERE id = ?`;
     db.run(sql, [paid, status, budgetId], function(err2) {
       if (err2) return callback(err2);
-      // return updated budget
+      // retorna orcamento atualizado
       getById(budgetId, (err3, updated) => {
         if (err3) return callback(err3);
         if (status === 'completed') {

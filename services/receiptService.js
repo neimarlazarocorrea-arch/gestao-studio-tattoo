@@ -74,7 +74,7 @@ function getByBudget(budgetId, callback) {
   );
 }
 
-// delete recibo
+// exclui recibo
 function remove(id, callback) {
   db.run('DELETE FROM receipts WHERE id = ?', [id], function(err) {
     if (err) return callback(err);

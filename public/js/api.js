@@ -1,4 +1,4 @@
-// helper compartilhado para consumir API no contrato { ok, data, error }
+// utilitario partilhado para consumir a API no contrato { ok, data, error }
 (function () {
   const TOAST_CONTAINER_ID = 'app-toast-container';
   const MAX_TOASTS = 4;
@@ -31,7 +31,7 @@
       localStorage.setItem(AUTH_STORAGE_KEY, token);
       emitAuthChanged();
     } catch {
-      // ignore storage errors
+      // ignora erros de armazenamento
     }
   }
 
