@@ -47,7 +47,7 @@ async function loadBudgets() {
     budgetsCache = Array.isArray(data) ? data : [];
     
     const sel = document.querySelector('select[name=budget_id]');
-    sel.innerHTML = '<option value="">-- Sem orçamento --</option>';
+    sel.innerHTML = '<option value="">-- Sem orcamento --</option>';
     // filtra apenas orçamentos ativos
     budgetsCache.filter(b => b.status === 'active').forEach(b => {
       const opt = document.createElement('option');
@@ -175,7 +175,7 @@ function applyUrlContextToForm() {
     if (budget) {
       const opt = document.createElement('option');
       opt.value = String(budget.id);
-      opt.textContent = `${budget.code || `#${budget.id}`} - ${budget.title || 'Orçamento'}`;
+      opt.textContent = `${budget.code || `#${budget.id}`} - ${budget.title || 'Orcamento'}`;
       budgetSelect.appendChild(opt);
     }
   }
@@ -184,7 +184,7 @@ function applyUrlContextToForm() {
   if (typeof budgetSelect.onchange === 'function') budgetSelect.onchange();
 
   if (contextServiceOrderId) {
-    notify(`Contexto aplicado: OS #${contextServiceOrderId} vinculada ao orçamento`, 'info', 4200);
+    notify(`Contexto aplicado: OS #${contextServiceOrderId} vinculada ao orcamento`, 'info', 4200);
   }
 
   renderContextBar();
@@ -250,7 +250,7 @@ async function listAppointments(filter) {
       
       const finishAction = a.is_completed
         ? '<span class="agenda-state-ok">Material confirmado</span>'
-        : `<button class="action-btn success finish-session" data-id="${a.id}" data-budget_id="${a.budget_id}">Finalizar Sessao</button>`;
+        : `<button class="action-btn success finish-session" data-id="${a.id}" data-budget_id="${a.budget_id}">Finalizar sessao</button>`;
 
       tr.innerHTML = `<td>${a.id}</td><td>${clientName}</td><td>${budgetCode}</td><td><div class="os-cell"><span>${soMeta.code}</span><span class="os-progress">${soMeta.progressText}</span></div></td><td>${a.date}</td><td>${a.time}</td><td>${a.duration_min || 180}</td><td>${a.service}</td><td>${a.price !== null ? a.price.toFixed(2) : '0.00'}</td><td>${statusLabel}</td><td><div class="agenda-actions">${finishAction}<button class="action-btn edit" data-id="${a.id}">Editar</button><button class="action-btn danger delete" data-id="${a.id}">Excluir</button></div></td>`;
       tbody.appendChild(tr);
@@ -276,7 +276,7 @@ function bindTableActions() {
     }
     if (e.target.matches('.delete')) {
       const id = e.target.dataset.id;
-      if (!confirm('Deseja excluir esse agendamento?')) return;
+      if (!confirm('Pretende eliminar este agendamento?')) return;
       try {
         await apiRequest('/api/appointments/' + id, { method: 'DELETE' });
         listAppointments(currentFilter); // recarrega tabela
@@ -457,10 +457,10 @@ async function submitFinishSession(appointmentId, budgetId) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' }
       });
-      notify('Projeto encerrado com sucesso', 'success');
+      notify('Projeto concluido com sucesso', 'success');
     } else if (nextAction === 'schedule-next') {
       // mostra formulário para agendar próxima sessão
-      notify('Agende a proxima sessao selecionando o mesmo orcamento', 'info', 5200);
+      notify('Agende a proxima sessao selecionando o mesmo orcamento.', 'info', 5200);
     }
     
     listAppointments(currentFilter);
@@ -526,7 +526,7 @@ document.getElementById('agendaForm').addEventListener('submit', async e => {
   }
 });
 
-// Inicialização (IIFE assíncrono)
+// Inicializacao (IIFE assincrono)
 (async () => {
   captureUrlContext();
   renderContextBar();

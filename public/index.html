@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -198,7 +198,7 @@
 
     <section id="dashboard">
       <h2>Painel</h2>
-      <div id="sum" class="muted">Carregando...</div>
+      <div id="sum" class="muted">A carregar...</div>
     </section>
 
     <section id="clients">
@@ -210,7 +210,7 @@
         <div class="row"><button class="primary" type="submit">Adicionar</button></div>
       </form>
       <div class="row" style="margin-top:8px;">
-        <input id="clientSearchInput" placeholder="Buscar cliente por nome, email ou telefone" />
+        <input id="clientSearchInput" placeholder="Procurar cliente por nome, email ou telefone" />
       </div>
       <table id="clientTable"><thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Telefone</th><th>Acoes</th></tr></thead><tbody></tbody></table>
     </section>
@@ -219,7 +219,7 @@
       <h2>Orcamentos</h2>
       <div class="muted">Fluxo recomendado: Orcamento ativo -> Criar OS -> Executar na Agenda -> Fechar projeto.</div>
       <div class="row" style="margin-top:8px;">
-        <input id="budgetSearchInput" placeholder="Buscar orcamento por codigo, titulo, cliente ou status" />
+        <input id="budgetSearchInput" placeholder="Procurar orcamento por codigo, titulo, cliente ou estado" />
       </div>
       <form id="budgetForm" class="grid" style="margin-top:10px;">
         <label>Cliente
@@ -249,7 +249,7 @@
     <section id="finance">
       <h2>Financeiro</h2>
       <div class="row" style="margin-bottom:8px;">
-        <input id="txnSearchInput" placeholder="Buscar transacao por categoria, descricao ou codigo de orcamento" />
+        <input id="txnSearchInput" placeholder="Procurar transacao por categoria, descricao ou codigo de orcamento" />
       </div>
       <form id="txnForm" class="grid">
         <label>Tipo
@@ -268,7 +268,7 @@
       <h2>Ordens de Servico</h2>
       <div class="muted">Fluxo operacional apos fechamento do orcamento.</div>
       <div class="row" style="margin-top:8px;">
-        <input id="serviceOrderSearchInput" placeholder="Buscar OS por codigo, cliente, orcamento, titulo ou status" />
+        <input id="serviceOrderSearchInput" placeholder="Procurar OS por codigo, cliente, orcamento, titulo ou estado" />
       </div>
       <div class="row" id="serviceOrderFilters" style="margin-top:8px;">
         <button type="button" class="filter-chip active" data-so-filter="all">Todas</button>
@@ -287,7 +287,7 @@
 
     <section id="receivables">
       <h2>Receitas / Contas a Receber</h2>
-      <div id="receivablesSummary" class="muted">Carregando...</div>
+      <div id="receivablesSummary" class="muted">A carregar...</div>
       <table id="clientsOverdueTable"><thead><tr><th>Cliente</th><th>Email</th><th>Telefone</th><th>Pendentes</th><th>Total</th></tr></thead><tbody></tbody></table>
     </section>
 
@@ -335,7 +335,7 @@
       try {
         await action();
       } catch (err) {
-        console.error('UI action failed:', err);
+        console.error('Falha na acao de interface:', err);
         notify(formatUiError(err, fallbackMessage), 'error');
       }
     }
@@ -417,10 +417,10 @@
         }
 
         if (action === 'delete') {
-          if (!confirm('Excluir este cliente? Esta acao nao pode ser desfeita.')) return;
+          if (!confirm('Eliminar este cliente? Esta acao nao pode ser desfeita.')) return;
           runUiAction(async () => {
             await apiGet(`/api/clients/${id}`, { method: 'DELETE' });
-            notify('Cliente excluido', 'success');
+            notify('Cliente eliminado', 'success');
             await loadClients();
           }, 'Erro ao excluir cliente');
         }
@@ -504,10 +504,10 @@
         }
 
         if (serviceOrder && serviceOrder.status !== 'completed' && budget.status !== 'completed') {
-          actions.push('<button type="button" class="action-btn secondary" disabled title="Conclua a OS antes de fechar o projeto">Fechar Projeto</button>');
+          actions.push('<button type="button" class="action-btn secondary" disabled title="Conclua a OS antes de fechar o projeto">Fechar projeto</button>');
         }
 
-        return actions.length ? `<div class="action-group">${actions.join('')}</div>` : '<span class="muted">Sem acao</span>';
+        return actions.length ? `<div class="action-group">${actions.join('')}</div>` : '<span class="muted">Sem acao disponivel</span>';
       }
 
       const budgetSearch = (document.getElementById('budgetSearchInput')?.value || '').trim().toLowerCase();
@@ -560,10 +560,10 @@
         const action = button.getAttribute('data-txn-action');
 
         if (action === 'delete') {
-          if (!confirm('Excluir esta transacao?')) return;
+          if (!confirm('Eliminar esta transacao?')) return;
           runUiAction(async () => {
             await apiGet(`/api/transactions/${id}`, { method: 'DELETE' });
-            notify('Transacao excluida', 'success');
+            notify('Transacao eliminada', 'success');
             await loadTxns();
           }, 'Erro ao excluir transacao');
           return;
@@ -770,7 +770,7 @@
       (arr || []).forEach(c => {
         tbody.innerHTML += `<tr><td>${c.name || ''}</td><td>${c.email || '-'}</td><td>${c.phone || '-'}</td><td>${c.pending_budgets || 0}</td><td>R$ ${parseFloat(c.total_outstanding || 0).toFixed(2)}</td></tr>`;
       });
-      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="5" class="muted">Sem clientes com debito.</td></tr>';
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="5" class="muted">Sem clientes com divida.</td></tr>';
     }
 
     async function loadReceipts() {
@@ -893,7 +893,7 @@
           if (id === 'menu-appointments') return;
           e.preventDefault();
           show(map[id][0]);
-          runUiAction(() => map[id][1](), 'Erro ao carregar secao');
+          runUiAction(() => map[id][1](), 'Erro ao carregar seccao');
         };
       });
     }
