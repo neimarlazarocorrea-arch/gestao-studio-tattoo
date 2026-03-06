@@ -70,3 +70,8 @@ Este bloco facilita o tratamento uniforme de respostas na interface.
 - `node_modules/` e `db/*.db` estao ignorados no git;
 - o esquema principal esta em `db/schema.sql`;
 - alteracoes de servidor/interface devem ser validadas com `npm run smoke:e2e`.
+
+## Manual completo
+
+Para instrucoes completas de instalacao e uso, consulte:
+- `MANUAL_INSTALACAO_USO.md`
