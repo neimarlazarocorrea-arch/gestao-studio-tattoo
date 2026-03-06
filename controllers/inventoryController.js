@@ -11,7 +11,7 @@ const removeItem = promisify(inventoryService.remove.bind(inventoryService));
 // helpers para respostas comuns
 function handleError(res, err) {
   console.error(err);
-  return res.status(500).json({ error: err.message || 'Internal server error' });
+  return res.status(500).json({ error: err.message || 'Erro interno do servidor' });
 }
 
 async function list(req, res) {
@@ -27,7 +27,7 @@ async function get(req, res) {
   const id = req.params.id;
   try {
     const row = await getById(id);
-    if (!row) return res.status(404).json({ error: 'Item not found' });
+    if (!row) return res.status(404).json({ error: 'Item nao encontrado' });
     res.json(row);
   } catch (err) {
     handleError(res, err);
@@ -37,7 +37,7 @@ async function get(req, res) {
 async function create(req, res) {
   const data = req.body;
   if (data.qty != null && data.qty < 0) {
-    return res.status(400).json({ error: 'Quantity cannot be negative' });
+    return res.status(400).json({ error: 'Quantidade nao pode ser negativa' });
   }
 
   try {
@@ -53,7 +53,7 @@ async function update(req, res) {
   const data = req.body;
 
   if (data.qty != null && data.qty < 0) {
-    return res.status(400).json({ error: 'Quantity cannot be negative' });
+    return res.status(400).json({ error: 'Quantidade nao pode ser negativa' });
   }
 
   try {
@@ -68,7 +68,7 @@ async function remove(req, res) {
   const id = req.params.id;
   try {
     const deleted = await removeItem(id);
-    if (!deleted) return res.status(404).json({ error: 'Item not found' });
+    if (!deleted) return res.status(404).json({ error: 'Item nao encontrado' });
     res.status(204).send();
   } catch (err) {
     handleError(res, err);

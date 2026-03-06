@@ -14,7 +14,7 @@ function getClient(req, res) {
   const id = req.params.id; // pega id da rota
   clientService.getById(id, (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'Client not found' }); // não encontrado
+    if (!row) return res.status(404).json({ error: 'Cliente nao encontrado' }); // não encontrado
     res.json(row); // retorna cliente
   });
 }
@@ -22,7 +22,7 @@ function getClient(req, res) {
 function createClient(req, res) {
   const data = req.body; // dados do cliente enviados no body
   if (!data || !data.name) {
-    return res.status(400).json({ error: 'Name is required' }); // validação simples
+    return res.status(400).json({ error: 'Nome e obrigatorio' }); // validação simples
   }
   clientService.create(data, (err, newRow) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -33,11 +33,11 @@ function createClient(req, res) {
 function updateClient(req, res) {
   const id = req.params.id;
   const data = req.body || {};
-  if (!data.name) return res.status(400).json({ error: 'Name is required' });
+  if (!data.name) return res.status(400).json({ error: 'Nome e obrigatorio' });
 
   clientService.update(id, data, (err, updated) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!updated) return res.status(404).json({ error: 'Client not found' });
+    if (!updated) return res.status(404).json({ error: 'Cliente nao encontrado' });
     auditService.logFromRequest(req, {
       action: 'client.update',
       entity_type: 'client',
@@ -51,7 +51,7 @@ function deleteClient(req, res) {
   const id = req.params.id;
   clientService.remove(id, (err, deleted) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!deleted) return res.status(404).json({ error: 'Client not found' }); // nada foi removido
+    if (!deleted) return res.status(404).json({ error: 'Cliente nao encontrado' }); // nada foi removido
     auditService.logFromRequest(req, {
       action: 'client.delete',
       entity_type: 'client',

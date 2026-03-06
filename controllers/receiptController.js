@@ -4,7 +4,7 @@ function create(req, res) {
   const data = req.body;
   
   if (!data.reference_id || !data.reference_type || !data.amount) {
-    return res.status(400).json({ error: 'reference_id, reference_type, and amount are required' });
+    return res.status(400).json({ error: 'reference_id, reference_type e amount sao obrigatorios' });
   }
 
   receiptService.createReceipt(data, (err, receipt) => {
@@ -17,7 +17,7 @@ function get(req, res) {
   const id = req.params.id;
   receiptService.getById(id, (err, receipt) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!receipt) return res.status(404).json({ error: 'Receipt not found' });
+    if (!receipt) return res.status(404).json({ error: 'Recibo nao encontrado' });
     res.json(receipt);
   });
 }
@@ -56,7 +56,7 @@ function remove(req, res) {
   const id = req.params.id;
   receiptService.remove(id, (err, deleted) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!deleted) return res.status(404).json({ error: 'Receipt not found' });
+    if (!deleted) return res.status(404).json({ error: 'Recibo nao encontrado' });
     res.status(204).send();
   });
 }

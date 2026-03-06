@@ -5,7 +5,7 @@ function create(req, res) {
   const data = req.body;
   
   if (!data.budget_id || !data.client_id) {
-    return res.status(400).json({ error: 'budget_id and client_id are required' });
+    return res.status(400).json({ error: 'budget_id e client_id sao obrigatorios' });
   }
 
   reminderService.createReminder(data, (err, reminder) => {
@@ -18,7 +18,7 @@ function getById(req, res) {
   const id = req.params.id;
   reminderService.getById(id, (err, reminder) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!reminder) return res.status(404).json({ error: 'Reminder not found' });
+    if (!reminder) return res.status(404).json({ error: 'Lembrete nao encontrado' });
     res.json(reminder);
   });
 }
@@ -49,7 +49,7 @@ function updateStatus(req, res) {
   const { status, sent_date } = req.body;
 
   if (!status) {
-    return res.status(400).json({ error: 'status is required' });
+    return res.status(400).json({ error: 'status e obrigatorio' });
   }
 
   reminderService.updateStatus(id, status, sent_date, (err, reminder) => {
@@ -69,7 +69,7 @@ function remove(req, res) {
   const id = req.params.id;
   reminderService.remove(id, (err, deleted) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!deleted) return res.status(404).json({ error: 'Reminder not found' });
+    if (!deleted) return res.status(404).json({ error: 'Lembrete nao encontrado' });
     res.status(204).send();
   });
 }

@@ -2,7 +2,7 @@ const service = require('../services/appointmentService'); // importa o serviço
 const auditService = require('../services/auditService');
 
 function handleServiceError(res, err) {
-  const message = err && err.message ? err.message : 'Internal error';
+  const message = err && err.message ? err.message : 'Erro interno';
   if (/not found|nao encontrado|não encontrado/i.test(message)) {
     return res.status(404).json({ error: message });
   }
@@ -21,7 +21,7 @@ exports.list = (req, res) => {
 exports.get = (req, res) => {
   service.getById(req.params.id, (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'Not found' }); // não encontrado
+    if (!row) return res.status(404).json({ error: 'Nao encontrado' }); // não encontrado
     res.json(row);
   });
 };

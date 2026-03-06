@@ -4,7 +4,7 @@ function getIncomeExpenseReport(req, res) {
   const { start_date, end_date } = req.query;
   
   if (!start_date || !end_date) {
-    return res.status(400).json({ error: 'start_date and end_date are required' });
+    return res.status(400).json({ error: 'start_date e end_date sao obrigatorios' });
   }
   
   reportService.getIncomeExpenseReport(start_date, end_date, (err, report) => {
@@ -17,7 +17,7 @@ function getCashFlowReport(req, res) {
   const { year } = req.query;
   
   if (!year) {
-    return res.status(400).json({ error: 'year is required' });
+    return res.status(400).json({ error: 'year e obrigatorio' });
   }
   
   reportService.getCashFlowReport(year, (err, report) => {
@@ -30,7 +30,7 @@ function getCategoryReport(req, res) {
   const { start_date, end_date } = req.query;
   
   if (!start_date || !end_date) {
-    return res.status(400).json({ error: 'start_date and end_date are required' });
+    return res.status(400).json({ error: 'start_date e end_date sao obrigatorios' });
   }
   
   reportService.getCategoryReport(start_date, end_date, (err, report) => {
@@ -50,7 +50,7 @@ function exportIncomeExpenseCSV(req, res) {
   const { start_date, end_date } = req.query;
   
   if (!start_date || !end_date) {
-    return res.status(400).json({ error: 'start_date and end_date are required' });
+    return res.status(400).json({ error: 'start_date e end_date sao obrigatorios' });
   }
   
   reportService.getIncomeExpenseReport(start_date, end_date, (err, report) => {
@@ -75,7 +75,7 @@ function exportCategoryCSV(req, res) {
   const { start_date, end_date } = req.query;
   
   if (!start_date || !end_date) {
-    return res.status(400).json({ error: 'start_date and end_date are required' });
+    return res.status(400).json({ error: 'start_date e end_date sao obrigatorios' });
   }
   
   reportService.getCategoryReport(start_date, end_date, (err, data) => {

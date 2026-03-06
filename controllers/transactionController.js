@@ -13,7 +13,7 @@ function get(req, res) {
   const id = req.params.id;
   transactionService.getById(id, (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'Transaction not found' }); // não existe
+    if (!row) return res.status(404).json({ error: 'Transacao nao encontrada' }); // não existe
     res.json(row); // retorna a transação
   });
 }
@@ -27,7 +27,7 @@ async function create(req, res) {
   if (data.budget_id) {
     return budgetService.getById(data.budget_id, (err, budget) => {
       if (err) return res.status(500).json({ error: err.message });
-      if (!budget) return res.status(400).json({ error: 'Budget not found' });
+      if (!budget) return res.status(400).json({ error: 'Orcamento nao encontrado' });
       // preencher valores padrão caso não enviados
       data.type = 'in';
       data.category = data.category || 'Orçamento';
@@ -38,7 +38,7 @@ async function create(req, res) {
       data.date = data.date || new Date().toISOString().split('T')[0];
 
       // validamos e criamos transação
-      if (data.amount <= 0) return res.status(400).json({ error: 'Amount must be positive' });
+      if (data.amount <= 0) return res.status(400).json({ error: 'Valor deve ser positivo' });
       if (data.amount > remaining) {
         // permitir pagar mais que o restante, mas avisar?
         // aqui apenas limitar ao restante
@@ -67,8 +67,8 @@ async function create(req, res) {
     });
   }
 
-  if (data.amount <= 0) return res.status(400).json({ error: 'Amount must be positive' }); // valor deve ser positivo
-  if (data.type !== 'in' && data.type !== 'out') return res.status(400).json({ error: 'Type must be in or out' }); // tipo inválido
+  if (data.amount <= 0) return res.status(400).json({ error: 'Valor deve ser positivo' }); // valor deve ser positivo
+  if (data.type !== 'in' && data.type !== 'out') return res.status(400).json({ error: 'Tipo deve ser in ou out' }); // tipo inválido
   transactionService.create(data, (err, newRow) => {
     if (err) return res.status(500).json({ error: err.message });
     res.status(201).json(newRow); // transação criada
@@ -78,7 +78,7 @@ async function create(req, res) {
 function update(req, res) {
   const id = req.params.id;
   const data = req.body;
-  if (data.amount != null && data.amount <= 0) return res.status(400).json({ error: 'Amount must be positive' }); // valida alteração
+  if (data.amount != null && data.amount <= 0) return res.status(400).json({ error: 'Valor deve ser positivo' }); // valida alteração
   transactionService.update(id, data, (err, updated) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(updated); // retorna transação atualizada
@@ -89,7 +89,7 @@ function remove(req, res) {
   const id = req.params.id;
   transactionService.remove(id, (err, deleted) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!deleted) return res.status(404).json({ error: 'Transaction not found' }); // nada para excluir
+    if (!deleted) return res.status(404).json({ error: 'Transacao nao encontrada' }); // nada para excluir
     auditService.logFromRequest(req, {
       action: 'transaction.delete',
       entity_type: 'transaction',
