@@ -1,16 +1,60 @@
-# React + Vite
+# Tattoo Gestao Pro
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema de gestao para estudio de tatuagem (Node.js + Express + SQLite + frontend estatico).
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js 18+
+- npm
 
-## React Compiler
+## Setup rapido
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm start
+```
 
-## Expanding the ESLint configuration
+Aplicacao:
+- Painel: `http://localhost:3000/`
+- Agenda: `http://localhost:3000/agenda`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Variaveis de ambiente
+
+Use o arquivo `.env.example` como referencia.
+
+Variaveis suportadas:
+- `PORT`: porta HTTP (padrao `3000`)
+- `CORS_ORIGIN`: lista de origens permitidas, separadas por virgula. Ex.: `http://localhost:3000,http://127.0.0.1:3000`
+- `AUTH_ENABLED`: habilita autenticacao Basic nas rotas `/api/*` (`true`/`false`)
+- `AUTH_USERS`: usuarios no formato `usuario:senha:perfil`, separados por virgula
+
+Exemplo de `AUTH_USERS`:
+- `admin:senha123:admin,operador:senha456:operator`
+
+## Autenticacao opcional (frontend)
+
+Quando `AUTH_ENABLED=true`:
+- O frontend exibe `Entrar API` / `Sair API` no painel e na agenda.
+- O login usa modal com validacao no servidor antes de salvar credenciais.
+- Se uma chamada API retornar `401`, o frontend pode solicitar login e refazer a requisicao uma vez.
+
+## Scripts uteis
+
+```bash
+npm run smoke:e2e      # regressao E2E principal
+npm run backup-db      # backup do SQLite em backups/
+npm run restore-db -- backups/arquivo.db
+npm run reset-db       # reset de banco (cuidado)
+```
+
+## Contrato de API
+
+Rotas em `/api/*` seguem envelope padrao:
+- sucesso: `{ "ok": true, "data": ... }`
+- erro: `{ "ok": false, "error": "..." }`
+
+## Observacoes de repositorio
+
+- `node_modules/` e `db/*.db` sao ignorados no git.
+- O schema fica em `db/schema.sql`.
+- Fluxos criticos devem ser validados com `npm run smoke:e2e`.

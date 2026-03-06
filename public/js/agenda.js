@@ -332,6 +332,35 @@ function clearForm() {
   f.reset();
 }
 
+function bindAgendaAuthButton() {
+  const btn = document.getElementById('agendaAuthBtn');
+  if (!btn) return;
+
+  function refresh() {
+    btn.textContent = window.hasApiAuth && window.hasApiAuth() ? 'Sair API' : 'Entrar API';
+  }
+
+  btn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (window.hasApiAuth && window.hasApiAuth()) {
+      window.logoutApiAuth();
+      refresh();
+      return;
+    }
+
+    const ok = window.loginApiAuthInteractive && await window.loginApiAuthInteractive();
+    refresh();
+    if (ok) {
+      listAppointments(currentFilter);
+    }
+  });
+
+  const authEvent = window.API_AUTH_CHANGED_EVENT || 'api-auth-changed';
+  window.addEventListener(authEvent, refresh);
+
+  refresh();
+}
+
 // mostra diálogo para finalizar sessão (confirmar material e oferecer opções)
 function showFinishSessionDialog(appointmentId, budget, budgetId) {
   let materialsHtml = '<div style="margin: 15px 0;">';
@@ -505,6 +534,7 @@ document.getElementById('agendaForm').addEventListener('submit', async e => {
   await loadBudgets();
   await loadServiceOrders();
   applyUrlContextToForm();
+  bindAgendaAuthButton();
   bindTableActions();
   listAppointments(currentFilter);
 })();

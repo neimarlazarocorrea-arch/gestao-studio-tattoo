@@ -192,6 +192,7 @@
         <a id="menu-receipts">Recibos</a>
         <a id="menu-reminders">Lembretes</a>
         <a id="menu-reports">Relatorios</a>
+        <a id="menu-auth">Entrar API</a>
       </nav>
     </header>
 
@@ -208,12 +209,35 @@
         <label>Telefone<input name="phone" /></label>
         <div class="row"><button class="primary" type="submit">Adicionar</button></div>
       </form>
-      <table id="clientTable"><thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Telefone</th></tr></thead><tbody></tbody></table>
+      <div class="row" style="margin-top:8px;">
+        <input id="clientSearchInput" placeholder="Buscar cliente por nome, email ou telefone" />
+      </div>
+      <table id="clientTable"><thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Telefone</th><th>Acoes</th></tr></thead><tbody></tbody></table>
     </section>
 
     <section id="budgets">
       <h2>Orcamentos</h2>
       <div class="muted">Fluxo recomendado: Orcamento ativo -> Criar OS -> Executar na Agenda -> Fechar projeto.</div>
+      <div class="row" style="margin-top:8px;">
+        <input id="budgetSearchInput" placeholder="Buscar orcamento por codigo, titulo, cliente ou status" />
+      </div>
+      <form id="budgetForm" class="grid" style="margin-top:10px;">
+        <label>Cliente
+          <select id="budgetClientSelect" name="client_id" required>
+            <option value="">-- selecione --</option>
+          </select>
+        </label>
+        <label>Titulo
+          <input name="title" required />
+        </label>
+        <label>Sessoes
+          <input name="sessions_count" type="number" min="1" value="1" />
+        </label>
+        <label>Valor total
+          <input name="total_value" type="number" step="0.01" min="0" value="0" />
+        </label>
+        <div class="row"><button class="primary" type="submit">Criar orcamento</button></div>
+      </form>
       <table id="budgetTable"><thead><tr><th>ID</th><th>Codigo</th><th>Cliente</th><th>Titulo</th><th>Status</th><th>Total</th><th>Pago</th><th>Fluxo</th><th>Acoes</th></tr></thead><tbody></tbody></table>
     </section>
 
@@ -224,6 +248,9 @@
 
     <section id="finance">
       <h2>Financeiro</h2>
+      <div class="row" style="margin-bottom:8px;">
+        <input id="txnSearchInput" placeholder="Buscar transacao por categoria, descricao ou codigo de orcamento" />
+      </div>
       <form id="txnForm" class="grid">
         <label>Tipo
           <select name="type"><option value="in">Entrada</option><option value="out">Saida</option></select>
@@ -234,12 +261,15 @@
         <label>Data<input name="date" type="date" /></label>
         <div class="row"><button class="primary" type="submit">Adicionar transacao</button></div>
       </form>
-      <table id="txnTable"><thead><tr><th>ID</th><th>Tipo</th><th>Categoria</th><th>Descricao</th><th>Valor</th><th>Data</th></tr></thead><tbody></tbody></table>
+      <table id="txnTable"><thead><tr><th>ID</th><th>Tipo</th><th>Categoria</th><th>Descricao</th><th>Valor</th><th>Data</th><th>Acoes</th></tr></thead><tbody></tbody></table>
     </section>
 
     <section id="service-orders">
       <h2>Ordens de Servico</h2>
       <div class="muted">Fluxo operacional apos fechamento do orcamento.</div>
+      <div class="row" style="margin-top:8px;">
+        <input id="serviceOrderSearchInput" placeholder="Buscar OS por codigo, cliente, orcamento, titulo ou status" />
+      </div>
       <div class="row" id="serviceOrderFilters" style="margin-top:8px;">
         <button type="button" class="filter-chip active" data-so-filter="all">Todas</button>
         <button type="button" class="filter-chip" data-so-filter="open">Abertas</button>
@@ -287,6 +317,7 @@
         <button onclick="loadCashFlowReport()" type="button">Fluxo Caixa</button>
         <button onclick="exportCategoryCSV()" type="button">Exportar categorias</button>
         <button onclick="exportBudgetCSV()" type="button">Exportar orcamentos</button>
+        <button onclick="exportSummaryCSV()" type="button">Exportar resumo gerencial</button>
       </div>
       <div id="financialSummaryReport" class="muted" style="margin-top:10px;">Carregue um relatorio.</div>
       <table id="categoryReportTable"><thead><tr><th>Categoria</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody></tbody></table>
@@ -298,6 +329,7 @@
   <script>
     const apiGet = window.apiRequest;
     let currentServiceOrderFilter = 'all';
+    let editingClientId = null;
 
     async function runUiAction(action, fallbackMessage) {
       try {
@@ -317,17 +349,8 @@
     async function loadSummary() {
       try {
         const d = await apiGet('/api/summary');
-        const serviceOrders = await apiGet('/api/service-orders').catch(() => []);
-        const completedCycles = (serviceOrders || []).map((so) => {
-          if (!so || so.status !== 'completed') return null;
-          const startMs = new Date(so.accepted_at || so.created_at || 0).getTime();
-          const endMs = new Date(so.completed_at || so.updated_at || 0).getTime();
-          if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return null;
-          return (endMs - startMs) / (1000 * 60 * 60 * 24);
-        }).filter((days) => Number.isFinite(days));
-
-        const avgCycleDays = completedCycles.length
-          ? (completedCycles.reduce((acc, n) => acc + n, 0) / completedCycles.length).toFixed(1)
+        const avgCycleDays = Number.isFinite(d.serviceOrderCycleAvgDays)
+          ? d.serviceOrderCycleAvgDays.toFixed(1)
           : '--';
 
         document.getElementById('sum').textContent = `Clientes: ${d.totalClients} | Hoje: ${d.todayCount} | Proximos 7 dias: ${d.upcomingAppointments.length} | Estoque baixo: ${d.lowStock.length} | Saldo: R$ ${(d.balance || 0).toFixed(2)} | Ciclo medio OS: ${avgCycleDays} dias`;
@@ -337,29 +360,112 @@
     }
 
     async function loadClients() {
-      const arr = await apiGet('/api/clients');
+      const searchValue = (document.getElementById('clientSearchInput')?.value || '').trim();
+      const suffix = searchValue ? `?q=${encodeURIComponent(searchValue)}` : '';
+      const arr = await apiGet(`/api/clients${suffix}`);
       const tbody = document.querySelector('#clientTable tbody');
       tbody.innerHTML = '';
       (arr || []).forEach(c => {
-        tbody.innerHTML += `<tr><td>${c.id}</td><td>${c.name || ''}</td><td>${c.email || ''}</td><td>${c.phone || ''}</td></tr>`;
+        tbody.innerHTML += `<tr><td>${c.id}</td><td>${c.name || ''}</td><td>${c.email || ''}</td><td>${c.phone || ''}</td><td><div class="action-group"><button type="button" class="action-btn secondary" data-client-action="edit" data-client-id="${c.id}">Editar</button><button type="button" class="action-btn danger" data-client-action="delete" data-client-id="${c.id}">Excluir</button></div></td></tr>`;
       });
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="5" class="muted">Sem clientes.</td></tr>';
     }
 
     document.getElementById('clientForm').addEventListener('submit', async e => {
       e.preventDefault();
       await runUiAction(async () => {
         const f = e.target;
-        await apiGet('/api/clients', {
-          method: 'POST',
+        const method = editingClientId ? 'PUT' : 'POST';
+        const path = editingClientId ? `/api/clients/${editingClientId}` : '/api/clients';
+        await apiGet(path, {
+          method,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: f.name.value, email: f.email.value, phone: f.phone.value })
         });
+        editingClientId = null;
+        const submitBtn = f.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.textContent = 'Adicionar';
         f.reset();
         await loadClients();
       });
     });
 
+    function bindClientActions() {
+      const table = document.getElementById('clientTable');
+      if (!table) return;
+
+      table.addEventListener('click', (e) => {
+        const button = e.target.closest('button[data-client-action][data-client-id]');
+        if (!button) return;
+
+        const id = button.getAttribute('data-client-id');
+        const action = button.getAttribute('data-client-action');
+
+        if (action === 'edit') {
+          runUiAction(async () => {
+            const c = await apiGet(`/api/clients/${id}`);
+            const f = document.getElementById('clientForm');
+            f.name.value = c.name || '';
+            f.email.value = c.email || '';
+            f.phone.value = c.phone || '';
+            editingClientId = id;
+            const submitBtn = f.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.textContent = 'Salvar alteracoes';
+            f.scrollIntoView({ behavior: 'smooth' });
+          }, 'Erro ao carregar cliente');
+          return;
+        }
+
+        if (action === 'delete') {
+          if (!confirm('Excluir este cliente? Esta acao nao pode ser desfeita.')) return;
+          runUiAction(async () => {
+            await apiGet(`/api/clients/${id}`, { method: 'DELETE' });
+            notify('Cliente excluido', 'success');
+            await loadClients();
+          }, 'Erro ao excluir cliente');
+        }
+      });
+    }
+
+    async function loadBudgetClientOptions() {
+      const sel = document.getElementById('budgetClientSelect');
+      if (!sel) return;
+      const current = sel.value;
+      const clients = await apiGet('/api/clients');
+      sel.innerHTML = '<option value="">-- selecione --</option>';
+      (clients || []).forEach((c) => {
+        sel.innerHTML += `<option value="${c.id}">${c.name || `Cliente #${c.id}`}</option>`;
+      });
+      if (current && Array.from(sel.options).some((opt) => opt.value === current)) {
+        sel.value = current;
+      }
+    }
+
+    document.getElementById('budgetForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await runUiAction(async () => {
+        const f = e.target;
+        await apiGet('/api/budgets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            client_id: Number(f.client_id.value),
+            title: f.title.value,
+            sessions_count: Number(f.sessions_count.value || 1),
+            total_value: Number(f.total_value.value || 0)
+          })
+        });
+        f.reset();
+        if (f.sessions_count) f.sessions_count.value = '1';
+        if (f.total_value) f.total_value.value = '0';
+        notify('Orcamento criado com sucesso', 'success');
+        await loadBudgets();
+        await loadSummary();
+      }, 'Erro ao criar orcamento');
+    });
+
     async function loadBudgets() {
+      await loadBudgetClientOptions().catch(() => {});
       const arr = await apiGet('/api/budgets');
       const serviceOrders = await apiGet('/api/service-orders').catch(() => []);
       const serviceOrderByBudget = new Map();
@@ -404,7 +510,14 @@
         return actions.length ? `<div class="action-group">${actions.join('')}</div>` : '<span class="muted">Sem acao</span>';
       }
 
+      const budgetSearch = (document.getElementById('budgetSearchInput')?.value || '').trim().toLowerCase();
+
       (arr || []).forEach(b => {
+        if (budgetSearch) {
+          const haystack = `${b.code || ''} ${b.title || ''} ${b.client_id || ''} ${b.status || ''}`.toLowerCase();
+          if (!haystack.includes(budgetSearch)) return;
+        }
+
         const relatedServiceOrder = serviceOrderByBudget.get(String(b.id)) || null;
         const flow = budgetFlowInfo(b, relatedServiceOrder);
         tbody.innerHTML += `<tr><td>${b.id}</td><td>${b.code || ''}</td><td>${b.client_id || ''}</td><td>${b.title || ''}</td><td>${b.status || ''}</td><td>R$ ${parseFloat(b.total_value || 0).toFixed(2)}</td><td>R$ ${parseFloat(b.amount_paid || 0).toFixed(2)}</td><td><span class="flow-pill ${flow.klass}">${flow.label}</span></td><td class="action-cell">${budgetActions(b, relatedServiceOrder)}</td></tr>`;
@@ -424,11 +537,67 @@
     }
 
     async function loadTxns() {
-      const arr = await apiGet('/api/transactions');
+      const searchValue = (document.getElementById('txnSearchInput')?.value || '').trim();
+      const suffix = searchValue ? `?q=${encodeURIComponent(searchValue)}` : '';
+      const arr = await apiGet(`/api/transactions${suffix}`);
       const tbody = document.querySelector('#txnTable tbody');
       tbody.innerHTML = '';
       (arr || []).forEach(t => {
-        tbody.innerHTML += `<tr><td>${t.id}</td><td>${t.type}</td><td>${t.category || ''}</td><td>${t.description || ''}</td><td>R$ ${parseFloat(t.amount || 0).toFixed(2)}</td><td>${t.date || ''}</td></tr>`;
+        tbody.innerHTML += `<tr><td>${t.id}</td><td>${t.type}</td><td>${t.category || ''}</td><td>${t.description || ''}</td><td>R$ ${parseFloat(t.amount || 0).toFixed(2)}</td><td>${t.date || ''}</td><td><div class="action-group"><button type="button" class="action-btn secondary" data-txn-action="edit" data-txn-id="${t.id}">Editar</button><button type="button" class="action-btn danger" data-txn-action="delete" data-txn-id="${t.id}">Excluir</button></div></td></tr>`;
+      });
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="7" class="muted">Sem transacoes.</td></tr>';
+    }
+
+    function bindTxnActions() {
+      const table = document.getElementById('txnTable');
+      if (!table) return;
+
+      table.addEventListener('click', (e) => {
+        const button = e.target.closest('button[data-txn-action][data-txn-id]');
+        if (!button) return;
+
+        const id = button.getAttribute('data-txn-id');
+        const action = button.getAttribute('data-txn-action');
+
+        if (action === 'delete') {
+          if (!confirm('Excluir esta transacao?')) return;
+          runUiAction(async () => {
+            await apiGet(`/api/transactions/${id}`, { method: 'DELETE' });
+            notify('Transacao excluida', 'success');
+            await loadTxns();
+          }, 'Erro ao excluir transacao');
+          return;
+        }
+
+        if (action === 'edit') {
+          runUiAction(async () => {
+            const tx = await apiGet(`/api/transactions/${id}`);
+            const category = prompt('Categoria:', tx.category || '');
+            if (category === null) return;
+            const description = prompt('Descricao:', tx.description || '');
+            if (description === null) return;
+            const amountRaw = prompt('Valor:', String(tx.amount || 0));
+            if (amountRaw === null) return;
+            const amount = Number(amountRaw);
+            if (!Number.isFinite(amount) || amount <= 0) {
+              notify('Valor invalido para transacao', 'warning');
+              return;
+            }
+            await apiGet(`/api/transactions/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: tx.type,
+                category,
+                description,
+                amount,
+                date: tx.date || new Date().toISOString().slice(0, 10)
+              })
+            });
+            notify('Transacao atualizada', 'success');
+            await loadTxns();
+          }, 'Erro ao editar transacao');
+        }
       });
     }
 
@@ -509,9 +678,14 @@
 
     async function loadServiceOrders() {
       const allRows = await apiGet('/api/service-orders');
+      const searchValue = (document.getElementById('serviceOrderSearchInput')?.value || '').trim().toLowerCase();
       const rows = (allRows || []).filter((so) => {
         if (currentServiceOrderFilter === 'all') return true;
         return so.status === currentServiceOrderFilter;
+      }).filter((so) => {
+        if (!searchValue) return true;
+        const haystack = `${so.code || ''} ${so.client_name || so.client_id || ''} ${so.budget_code || so.budget_id || ''} ${so.title || ''} ${so.status || ''}`.toLowerCase();
+        return haystack.includes(searchValue);
       });
 
       const priority = {
@@ -636,7 +810,9 @@
 
     async function loadFinancialSummaryReport() {
       const s = await apiGet('/api/reports/summary');
-      document.getElementById('financialSummaryReport').textContent = `Receitas: R$ ${parseFloat(s.totalIncome || 0).toFixed(2)} | Despesas: R$ ${parseFloat(s.totalExpense || 0).toFixed(2)} | Lucro: R$ ${parseFloat(s.netProfit || 0).toFixed(2)} | Orcamentos em aberto: R$ ${parseFloat(s.outstandingBudgets || 0).toFixed(2)}`;
+      const avgCycleDays = Number.isFinite(s.serviceOrderCycleAvgDays) ? s.serviceOrderCycleAvgDays.toFixed(1) : '--';
+      const completedOs = Number.isFinite(s.serviceOrdersCompletedCount) ? s.serviceOrdersCompletedCount : 0;
+      document.getElementById('financialSummaryReport').textContent = `Receitas: R$ ${parseFloat(s.totalIncome || 0).toFixed(2)} | Despesas: R$ ${parseFloat(s.totalExpense || 0).toFixed(2)} | Lucro: R$ ${parseFloat(s.netProfit || 0).toFixed(2)} | Orcamentos em aberto: R$ ${parseFloat(s.outstandingBudgets || 0).toFixed(2)} | Ciclo medio OS: ${avgCycleDays} dias (${completedOs} concluidas)`;
       await loadBudgetReport();
     }
 
@@ -693,6 +869,10 @@
       window.location.href = '/api/reports/export/budgets';
     }
 
+    function exportSummaryCSV() {
+      window.location.href = '/api/reports/export/summary';
+    }
+
     function bindMenu() {
       const map = {
         'menu-dashboard': ['dashboard', loadSummary],
@@ -716,6 +896,35 @@
           runUiAction(() => map[id][1](), 'Erro ao carregar secao');
         };
       });
+    }
+
+    function bindAuthMenu() {
+      const node = document.getElementById('menu-auth');
+      if (!node) return;
+
+      function refresh() {
+        node.textContent = window.hasApiAuth && window.hasApiAuth() ? 'Sair API' : 'Entrar API';
+      }
+
+      node.onclick = async (e) => {
+        e.preventDefault();
+        if (window.hasApiAuth && window.hasApiAuth()) {
+          window.logoutApiAuth();
+          refresh();
+          return;
+        }
+
+        const ok = window.loginApiAuthInteractive && await window.loginApiAuthInteractive();
+        refresh();
+        if (ok) {
+          await runUiAction(() => loadSummary(), 'Erro ao validar autenticacao API');
+        }
+      };
+
+      const authEvent = window.API_AUTH_CHANGED_EVENT || 'api-auth-changed';
+      window.addEventListener(authEvent, refresh);
+
+      refresh();
     }
 
     function bindServiceOrderActions() {
@@ -802,8 +1011,24 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       bindMenu();
+      bindAuthMenu();
+      bindClientActions();
+      bindTxnActions();
       bindServiceOrderActions();
       bindBudgetActions();
+
+      const clientSearch = document.getElementById('clientSearchInput');
+      if (clientSearch) clientSearch.addEventListener('input', () => runUiAction(() => loadClients(), 'Erro ao filtrar clientes'));
+
+      const txnSearch = document.getElementById('txnSearchInput');
+      if (txnSearch) txnSearch.addEventListener('input', () => runUiAction(() => loadTxns(), 'Erro ao filtrar transacoes'));
+
+      const budgetSearch = document.getElementById('budgetSearchInput');
+      if (budgetSearch) budgetSearch.addEventListener('input', () => runUiAction(() => loadBudgets(), 'Erro ao filtrar orcamentos'));
+
+      const soSearch = document.getElementById('serviceOrderSearchInput');
+      if (soSearch) soSearch.addEventListener('input', () => runUiAction(() => loadServiceOrders(), 'Erro ao filtrar ordens de servico'));
+
       show('dashboard');
       loadSummary();
     });
