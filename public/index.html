@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tattoo Studio Pro</title>
+  <style>
+    :root {
+      --bg: #101214;
+      --panel: #1b1f24;
+      --panel-2: #222831;
+      --accent: #d4af37;
+      --text: #f5f5f5;
+      --muted: #9aa4af;
+      --ok: #2ecc71;
+      --bad: #e74c3c;
+      --line: #39424d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Segoe UI, Tahoma, Arial, sans-serif;
+      background: radial-gradient(circle at top, #1a1f26, #0e1116 60%);
+      color: var(--text);
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    header {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      background: linear-gradient(90deg, rgba(212,175,55,0.1), rgba(212,175,55,0.02));
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .title h1 { margin: 0; color: var(--accent); font-size: 36px; }
+    .title p { margin: 2px 0 0 0; color: var(--muted); }
+    nav { display: flex; flex-wrap: wrap; gap: 8px; }
+    nav a {
+      text-decoration: none;
+      color: var(--text);
+      background: #161a20;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    nav a:hover { border-color: var(--accent); color: var(--accent); }
+    section {
+      display: none;
+      background: rgba(27, 31, 36, 0.95);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    section.active { display: block; }
+    h2 { color: var(--accent); margin: 0 0 12px 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+    input, select, textarea, button {
+      font: inherit;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+    }
+    button { cursor: pointer; }
+    button.primary { background: #2d3642; border-color: var(--accent); }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 8px; text-align: left; font-size: 13px; }
+    th { color: var(--accent); }
+    .ok { color: var(--ok); }
+    .bad { color: var(--bad); }
+    .muted { color: var(--muted); }
+    .so-row-in-progress { background: rgba(46, 204, 113, 0.08); }
+    .so-row-open { background: rgba(212, 175, 55, 0.08); }
+    .so-row-completed { background: rgba(127, 140, 141, 0.12); }
+    .so-row-cancelled { background: rgba(231, 76, 60, 0.08); }
+    .so-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      line-height: 1.2;
+      border: 1px solid transparent;
+      font-weight: 600;
+    }
+    .so-badge-dot {
+      margin-right: 6px;
+      font-size: 10px;
+      vertical-align: middle;
+    }
+    .so-badge-open {
+      background: rgba(212, 175, 55, 0.2);
+      border-color: rgba(212, 175, 55, 0.45);
+      color: #ffe39b;
+    }
+    .so-badge-in-progress {
+      background: rgba(46, 204, 113, 0.2);
+      border-color: rgba(46, 204, 113, 0.45);
+      color: #bff5d3;
+    }
+    .so-badge-completed {
+      background: rgba(127, 140, 141, 0.25);
+      border-color: rgba(127, 140, 141, 0.5);
+      color: #dde3e4;
+    }
+    .so-badge-cancelled {
+      background: rgba(231, 76, 60, 0.22);
+      border-color: rgba(231, 76, 60, 0.5);
+      color: #ffd0ca;
+    }
+    .filter-chip {
+      background: #161a20;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 6px 10px;
+      border-radius: 16px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .filter-chip.active {
+      color: var(--text);
+      border-color: var(--accent);
+      background: #2d3642;
+    }
+    .flow-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: #161a20;
+    }
+    .flow-pill.waiting { border-color: rgba(212,175,55,0.45); color: #ffe39b; }
+    .flow-pill.progress { border-color: rgba(46,204,113,0.45); color: #bff5d3; }
+    .flow-pill.done { border-color: rgba(127,140,141,0.5); color: #dde3e4; }
+    .action-cell { min-width: 250px; }
+    .action-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .action-btn {
+      padding: 5px 8px;
+      font-size: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #1f252e;
+      color: var(--text);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .action-btn.success { border-color: rgba(46,204,113,0.5); }
+    .action-btn.danger { border-color: rgba(231,76,60,0.5); }
+    .action-btn.secondary { border-color: rgba(127,140,141,0.45); color: #dde3e4; }
+    .action-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      border-color: var(--line);
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">
+        <h1>Tattoo Studio Pro</h1>
+        <p>Gestao profissional</p>
+      </div>
+      <nav>
+        <a id="menu-dashboard">Painel</a>
+        <a id="menu-clients">Clientes</a>
+        <a id="menu-appointments" href="/agenda">Agenda</a>
+        <a id="menu-budgets">Orcamentos</a>
+        <a id="menu-materials">Estoque</a>
+        <a id="menu-finance">Financeiro</a>
+        <a id="menu-service-orders">Ordens de Servico</a>
+        <a id="menu-receivables">Receitas</a>
+        <a id="menu-receipts">Recibos</a>
+        <a id="menu-reminders">Lembretes</a>
+        <a id="menu-reports">Relatorios</a>
+      </nav>
+    </header>
+
+    <section id="dashboard">
+      <h2>Painel</h2>
+      <div id="sum" class="muted">Carregando...</div>
+    </section>
+
+    <section id="clients">
+      <h2>Clientes</h2>
+      <form id="clientForm" class="grid">
+        <label>Nome<input name="name" required /></label>
+        <label>Email<input name="email" type="email" /></label>
+        <label>Telefone<input name="phone" /></label>
+        <div class="row"><button class="primary" type="submit">Adicionar</button></div>
+      </form>
+      <table id="clientTable"><thead><tr><th>ID</th><th>Nome</th><th>Email</th><th>Telefone</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="budgets">
+      <h2>Orcamentos</h2>
+      <div class="muted">Fluxo recomendado: Orcamento ativo -> Criar OS -> Executar na Agenda -> Fechar projeto.</div>
+      <table id="budgetTable"><thead><tr><th>ID</th><th>Codigo</th><th>Cliente</th><th>Titulo</th><th>Status</th><th>Total</th><th>Pago</th><th>Fluxo</th><th>Acoes</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="materials">
+      <h2>Estoque</h2>
+      <table id="materialTable"><thead><tr><th>ID</th><th>Nome</th><th>Marca</th><th>Qtd</th><th>Min</th><th>Status</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="finance">
+      <h2>Financeiro</h2>
+      <form id="txnForm" class="grid">
+        <label>Tipo
+          <select name="type"><option value="in">Entrada</option><option value="out">Saida</option></select>
+        </label>
+        <label>Categoria<input name="category" /></label>
+        <label>Descricao<input name="description" /></label>
+        <label>Valor<input name="amount" type="number" step="0.01" required /></label>
+        <label>Data<input name="date" type="date" /></label>
+        <div class="row"><button class="primary" type="submit">Adicionar transacao</button></div>
+      </form>
+      <table id="txnTable"><thead><tr><th>ID</th><th>Tipo</th><th>Categoria</th><th>Descricao</th><th>Valor</th><th>Data</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="service-orders">
+      <h2>Ordens de Servico</h2>
+      <div class="muted">Fluxo operacional apos fechamento do orcamento.</div>
+      <div class="row" id="serviceOrderFilters" style="margin-top:8px;">
+        <button type="button" class="filter-chip active" data-so-filter="all">Todas</button>
+        <button type="button" class="filter-chip" data-so-filter="open">Abertas</button>
+        <button type="button" class="filter-chip" data-so-filter="in_progress">Em execucao</button>
+        <button type="button" class="filter-chip" data-so-filter="completed">Concluidas</button>
+        <button type="button" class="filter-chip" data-so-filter="cancelled">Canceladas</button>
+      </div>
+      <table id="serviceOrderTable">
+        <thead>
+          <tr><th>ID</th><th>Codigo</th><th>Cliente</th><th>Orcamento</th><th>Titulo</th><th>Status</th><th>Sessoes</th><th>Acoes</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="receivables">
+      <h2>Receitas / Contas a Receber</h2>
+      <div id="receivablesSummary" class="muted">Carregando...</div>
+      <table id="clientsOverdueTable"><thead><tr><th>Cliente</th><th>Email</th><th>Telefone</th><th>Pendentes</th><th>Total</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="receipts">
+      <h2>Recibos</h2>
+      <div class="row">
+        <input id="receiptStartDate" type="date" />
+        <input id="receiptEndDate" type="date" />
+        <button type="button" onclick="loadReceipts()">Filtrar</button>
+        <button type="button" onclick="clearReceiptFilters()">Limpar</button>
+      </div>
+      <table id="receiptsTable"><thead><tr><th>ID</th><th>Data</th><th>Tipo</th><th>Ref</th><th>Descricao</th><th>Valor</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="reminders">
+      <h2>Lembretes</h2>
+      <div class="row"><button type="button" onclick="generateReminders()">Gerar lembretes</button></div>
+      <table id="remindersTable"><thead><tr><th>ID</th><th>Cliente</th><th>Orcamento</th><th>Agendado</th><th>Status</th></tr></thead><tbody></tbody></table>
+    </section>
+
+    <section id="reports">
+      <h2>Relatorios</h2>
+      <div class="row">
+        <input id="reportStartDate" type="date" />
+        <input id="reportEndDate" type="date" />
+        <button onclick="loadIncomeExpenseReport()" type="button">Receitas x Despesas</button>
+        <button onclick="loadCashFlowReport()" type="button">Fluxo Caixa</button>
+        <button onclick="exportCategoryCSV()" type="button">Exportar categorias</button>
+        <button onclick="exportBudgetCSV()" type="button">Exportar orcamentos</button>
+      </div>
+      <div id="financialSummaryReport" class="muted" style="margin-top:10px;">Carregue um relatorio.</div>
+      <table id="categoryReportTable"><thead><tr><th>Categoria</th><th>Tipo</th><th>Qtd</th><th>Total</th></tr></thead><tbody></tbody></table>
+      <table id="budgetReportTable"><thead><tr><th>ID</th><th>Codigo</th><th>Cliente</th><th>Titulo</th><th>Total</th><th>Pago</th><th>Restante</th><th>Status</th><th>%</th></tr></thead><tbody></tbody></table>
+    </section>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script>
+    const apiGet = window.apiRequest;
+    let currentServiceOrderFilter = 'all';
+
+    async function runUiAction(action, fallbackMessage) {
+      try {
+        await action();
+      } catch (err) {
+        console.error('UI action failed:', err);
+        notify(formatUiError(err, fallbackMessage), 'error');
+      }
+    }
+
+    function show(sectionId) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById(sectionId);
+      if (el) el.classList.add('active');
+    }
+
+    async function loadSummary() {
+      try {
+        const d = await apiGet('/api/summary');
+        const serviceOrders = await apiGet('/api/service-orders').catch(() => []);
+        const completedCycles = (serviceOrders || []).map((so) => {
+          if (!so || so.status !== 'completed') return null;
+          const startMs = new Date(so.accepted_at || so.created_at || 0).getTime();
+          const endMs = new Date(so.completed_at || so.updated_at || 0).getTime();
+          if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return null;
+          return (endMs - startMs) / (1000 * 60 * 60 * 24);
+        }).filter((days) => Number.isFinite(days));
+
+        const avgCycleDays = completedCycles.length
+          ? (completedCycles.reduce((acc, n) => acc + n, 0) / completedCycles.length).toFixed(1)
+          : '--';
+
+        document.getElementById('sum').textContent = `Clientes: ${d.totalClients} | Hoje: ${d.todayCount} | Proximos 7 dias: ${d.upcomingAppointments.length} | Estoque baixo: ${d.lowStock.length} | Saldo: R$ ${(d.balance || 0).toFixed(2)} | Ciclo medio OS: ${avgCycleDays} dias`;
+      } catch {
+        document.getElementById('sum').textContent = 'Nao foi possivel carregar o resumo.';
+      }
+    }
+
+    async function loadClients() {
+      const arr = await apiGet('/api/clients');
+      const tbody = document.querySelector('#clientTable tbody');
+      tbody.innerHTML = '';
+      (arr || []).forEach(c => {
+        tbody.innerHTML += `<tr><td>${c.id}</td><td>${c.name || ''}</td><td>${c.email || ''}</td><td>${c.phone || ''}</td></tr>`;
+      });
+    }
+
+    document.getElementById('clientForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      await runUiAction(async () => {
+        const f = e.target;
+        await apiGet('/api/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: f.name.value, email: f.email.value, phone: f.phone.value })
+        });
+        f.reset();
+        await loadClients();
+      });
+    });
+
+    async function loadBudgets() {
+      const arr = await apiGet('/api/budgets');
+      const serviceOrders = await apiGet('/api/service-orders').catch(() => []);
+      const serviceOrderByBudget = new Map();
+      (serviceOrders || []).forEach((so) => {
+        if (so && so.budget_id != null && !serviceOrderByBudget.has(String(so.budget_id))) {
+          serviceOrderByBudget.set(String(so.budget_id), so);
+        }
+      });
+
+      const tbody = document.querySelector('#budgetTable tbody');
+      tbody.innerHTML = '';
+
+      function budgetFlowInfo(budget, serviceOrder) {
+        if (budget.status === 'completed') return { label: 'Projeto concluido', klass: 'done' };
+        if (!serviceOrder) return { label: 'Aguardando criacao de OS', klass: 'waiting' };
+        if (serviceOrder.status === 'open') return { label: 'OS aberta, pronto para agendar', klass: 'waiting' };
+        if (serviceOrder.status === 'in_progress') return { label: 'OS em execucao', klass: 'progress' };
+        if (serviceOrder.status === 'completed') return { label: 'OS concluida, pronto para fechar', klass: 'done' };
+        if (serviceOrder.status === 'cancelled') return { label: 'OS cancelada', klass: 'done' };
+        return { label: 'Fluxo em analise', klass: '' };
+      }
+
+      function budgetActions(budget, serviceOrder) {
+        const actions = [];
+        if (!serviceOrder && budget.status !== 'completed' && budget.status !== 'cancelled') {
+          actions.push(`<button type="button" class="action-btn success" data-budget-action="create-os" data-budget-id="${budget.id}">Criar OS</button>`);
+        }
+
+        if (serviceOrder) {
+          actions.push(`<button type="button" class="action-btn secondary" data-budget-action="open-os" data-budget-id="${budget.id}">Ver OS</button>`);
+          actions.push(`<button type="button" class="action-btn" data-budget-action="go-agenda" data-budget-id="${budget.id}" data-so-id="${serviceOrder.id}">Agendar</button>`);
+        }
+
+        if (serviceOrder && serviceOrder.status === 'completed' && budget.status !== 'completed') {
+          actions.push(`<button type="button" class="action-btn success" data-budget-action="close-budget" data-budget-id="${budget.id}">Fechar Projeto</button>`);
+        }
+
+        if (serviceOrder && serviceOrder.status !== 'completed' && budget.status !== 'completed') {
+          actions.push('<button type="button" class="action-btn secondary" disabled title="Conclua a OS antes de fechar o projeto">Fechar Projeto</button>');
+        }
+
+        return actions.length ? `<div class="action-group">${actions.join('')}</div>` : '<span class="muted">Sem acao</span>';
+      }
+
+      (arr || []).forEach(b => {
+        const relatedServiceOrder = serviceOrderByBudget.get(String(b.id)) || null;
+        const flow = budgetFlowInfo(b, relatedServiceOrder);
+        tbody.innerHTML += `<tr><td>${b.id}</td><td>${b.code || ''}</td><td>${b.client_id || ''}</td><td>${b.title || ''}</td><td>${b.status || ''}</td><td>R$ ${parseFloat(b.total_value || 0).toFixed(2)}</td><td>R$ ${parseFloat(b.amount_paid || 0).toFixed(2)}</td><td><span class="flow-pill ${flow.klass}">${flow.label}</span></td><td class="action-cell">${budgetActions(b, relatedServiceOrder)}</td></tr>`;
+      });
+
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="9" class="muted">Sem orcamentos.</td></tr>';
+    }
+
+    async function loadMaterials() {
+      const arr = await apiGet('/api/materials');
+      const tbody = document.querySelector('#materialTable tbody');
+      tbody.innerHTML = '';
+      (arr || []).forEach(m => {
+        const low = Number(m.current_qty || 0) <= Number(m.min_qty || 0);
+        tbody.innerHTML += `<tr><td>${m.id}</td><td>${m.name || ''}</td><td>${m.brand || ''}</td><td>${m.current_qty || 0}</td><td>${m.min_qty || 0}</td><td class="${low ? 'bad' : 'ok'}">${low ? 'Baixo' : 'OK'}</td></tr>`;
+      });
+    }
+
+    async function loadTxns() {
+      const arr = await apiGet('/api/transactions');
+      const tbody = document.querySelector('#txnTable tbody');
+      tbody.innerHTML = '';
+      (arr || []).forEach(t => {
+        tbody.innerHTML += `<tr><td>${t.id}</td><td>${t.type}</td><td>${t.category || ''}</td><td>${t.description || ''}</td><td>R$ ${parseFloat(t.amount || 0).toFixed(2)}</td><td>${t.date || ''}</td></tr>`;
+      });
+    }
+
+    function serviceOrderActions(so) {
+      const actions = [];
+
+      if (so.status !== 'cancelled') {
+        actions.push(`<button type="button" class="action-btn" data-go-agenda="1" data-so-id="${so.id}" data-budget-id="${so.budget_id || ''}" title="Abrir agenda ja vinculada a esta OS">Agendar</button>`);
+      }
+
+      if (so.status === 'open') actions.push(`<button type="button" class="action-btn success" data-so-id="${so.id}" data-so-status="in_progress" title="Iniciar execução da OS" aria-label="Iniciar execução da ordem de serviço ${so.code || so.id}">Iniciar</button>`);
+      if (so.status === 'in_progress') actions.push(`<button type="button" class="action-btn success" data-so-id="${so.id}" data-so-status="completed" title="Concluir OS" aria-label="Concluir ordem de serviço ${so.code || so.id}">Concluir</button>`);
+      if (so.status !== 'cancelled' && so.status !== 'completed') actions.push(`<button type="button" class="action-btn danger" data-so-id="${so.id}" data-so-status="cancelled" title="Cancelar OS" aria-label="Cancelar ordem de serviço ${so.code || so.id}">Cancelar</button>`);
+
+      if (!actions.length) return '<span class="muted">Finalizada</span>';
+      return `<div class="action-group">${actions.join('')}</div>`;
+    }
+
+    function serviceOrderStatusLabel(status) {
+      const map = {
+        open: 'Aberta',
+        in_progress: 'Em execucao',
+        completed: 'Concluida',
+        cancelled: 'Cancelada'
+      };
+      return map[status] || status || '-';
+    }
+
+    function serviceOrderStatusBadge(status) {
+      const classMap = {
+        open: 'so-badge so-badge-open',
+        in_progress: 'so-badge so-badge-in-progress',
+        completed: 'so-badge so-badge-completed',
+        cancelled: 'so-badge so-badge-cancelled'
+      };
+      const klass = classMap[status] || 'so-badge';
+      return `<span class="${klass}"><span class="so-badge-dot" aria-hidden="true">●</span>${serviceOrderStatusLabel(status)}</span>`;
+    }
+
+    function serviceOrderRowClass(status) {
+      const map = {
+        in_progress: 'so-row-in-progress',
+        open: 'so-row-open',
+        completed: 'so-row-completed',
+        cancelled: 'so-row-cancelled'
+      };
+      return map[status] || '';
+    }
+
+    function updateServiceOrderFilterCounts(rows) {
+      const allRows = Array.isArray(rows) ? rows : [];
+      const counts = {
+        all: allRows.length,
+        open: 0,
+        in_progress: 0,
+        completed: 0,
+        cancelled: 0
+      };
+
+      allRows.forEach((so) => {
+        const key = so && so.status;
+        if (Object.prototype.hasOwnProperty.call(counts, key)) counts[key] += 1;
+      });
+
+      const labels = {
+        all: 'Todas',
+        open: 'Abertas',
+        in_progress: 'Em execucao',
+        completed: 'Concluidas',
+        cancelled: 'Canceladas'
+      };
+
+      document.querySelectorAll('#serviceOrderFilters .filter-chip').forEach((btn) => {
+        const key = btn.getAttribute('data-so-filter') || 'all';
+        btn.textContent = `${labels[key] || key} (${counts[key] || 0})`;
+      });
+    }
+
+    async function loadServiceOrders() {
+      const allRows = await apiGet('/api/service-orders');
+      const rows = (allRows || []).filter((so) => {
+        if (currentServiceOrderFilter === 'all') return true;
+        return so.status === currentServiceOrderFilter;
+      });
+
+      const priority = {
+        in_progress: 1,
+        open: 2,
+        completed: 3,
+        cancelled: 4
+      };
+
+      rows.sort((a, b) => {
+        const pa = priority[a.status] || 99;
+        const pb = priority[b.status] || 99;
+        if (pa !== pb) return pa - pb;
+
+        const da = new Date(a.updated_at || a.created_at || 0).getTime();
+        const db = new Date(b.updated_at || b.created_at || 0).getTime();
+        return db - da;
+      });
+
+      updateServiceOrderFilterCounts(allRows);
+
+      const tbody = document.querySelector('#serviceOrderTable tbody');
+      tbody.innerHTML = '';
+
+      (rows || []).forEach(so => {
+        const sessions = `${so.sessions_completed || 0}/${so.sessions_count || 0}`;
+        tbody.innerHTML += `<tr class="${serviceOrderRowClass(so.status)}"><td>${so.id}</td><td>${so.code || ''}</td><td>${so.client_name || so.client_id || ''}</td><td>${so.budget_code || so.budget_id || ''}</td><td>${so.title || ''}</td><td>${serviceOrderStatusBadge(so.status)}</td><td>${sessions}</td><td>${serviceOrderActions(so)}</td></tr>`;
+      });
+
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="8" class="muted">Sem ordens de servico.</td></tr>';
+    }
+
+    async function updateServiceOrderStatus(id, status) {
+      await apiGet(`/api/service-orders/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      notify('Status da OS atualizado', 'success');
+      await loadServiceOrders();
+    }
+
+    function setServiceOrderFilter(nextFilter) {
+      currentServiceOrderFilter = nextFilter || 'all';
+      document.querySelectorAll('#serviceOrderFilters .filter-chip').forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-so-filter') === currentServiceOrderFilter);
+      });
+      runUiAction(() => loadServiceOrders(), 'Erro ao carregar ordens de servico');
+    }
+
+    document.getElementById('txnForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      await runUiAction(async () => {
+        const f = e.target;
+        await apiGet('/api/transactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: f.type.value,
+            category: f.category.value,
+            description: f.description.value,
+            amount: Number(f.amount.value || 0),
+            date: f.date.value || new Date().toISOString().slice(0, 10)
+          })
+        });
+        f.reset();
+        await loadTxns();
+      });
+    });
+
+    async function loadReceivablesReport() {
+      const report = await apiGet('/api/receivables/report');
+      const s = report.summary || {};
+      document.getElementById('receivablesSummary').textContent = `Total a receber: R$ ${parseFloat(s.total_outstanding || 0).toFixed(2)} | Pendentes: ${s.pending_count || 0} | Media: R$ ${parseFloat(s.avg_outstanding || 0).toFixed(2)}`;
+      await loadOverdueClients();
+    }
+
+    async function loadOverdueClients() {
+      const arr = await apiGet('/api/receivables/overdue');
+      const tbody = document.querySelector('#clientsOverdueTable tbody');
+      tbody.innerHTML = '';
+      (arr || []).forEach(c => {
+        tbody.innerHTML += `<tr><td>${c.name || ''}</td><td>${c.email || '-'}</td><td>${c.phone || '-'}</td><td>${c.pending_budgets || 0}</td><td>R$ ${parseFloat(c.total_outstanding || 0).toFixed(2)}</td></tr>`;
+      });
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="5" class="muted">Sem clientes com debito.</td></tr>';
+    }
+
+    async function loadReceipts() {
+      const s = document.getElementById('receiptStartDate').value;
+      const e = document.getElementById('receiptEndDate').value;
+      let url = '/api/receipts';
+      if (s && e) url += `?start_date=${s}&end_date=${e}`;
+      const arr = await apiGet(url);
+      const tbody = document.querySelector('#receiptsTable tbody');
+      tbody.innerHTML = '';
+      (arr || []).forEach(r => {
+        tbody.innerHTML += `<tr><td>${r.id}</td><td>${r.date || ''}</td><td>${r.type || ''}</td><td>${r.reference_type || ''} #${r.reference_id || ''}</td><td>${r.description || ''}</td><td>R$ ${parseFloat(r.amount || 0).toFixed(2)}</td></tr>`;
+      });
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="6" class="muted">Sem recibos.</td></tr>';
+    }
+
+    function clearReceiptFilters() {
+      document.getElementById('receiptStartDate').value = '';
+      document.getElementById('receiptEndDate').value = '';
+      runUiAction(() => loadReceipts(), 'Erro ao carregar recibos');
+    }
+
+    async function generateReminders() {
+      await apiGet('/api/reminders/generate', { method: 'POST' });
+      await loadReminders();
+    }
+
+    async function loadReminders() {
+      const arr = await apiGet('/api/reminders');
+      const tbody = document.querySelector('#remindersTable tbody');
+      tbody.innerHTML = '';
+      (arr || []).forEach(r => {
+        tbody.innerHTML += `<tr><td>${r.id}</td><td>${r.client_name || ''}</td><td>${r.budget_code || ''}</td><td>${r.scheduled_date || ''}</td><td>${r.status || ''}</td></tr>`;
+      });
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="5" class="muted">Sem lembretes.</td></tr>';
+    }
+
+    async function loadFinancialSummaryReport() {
+      const s = await apiGet('/api/reports/summary');
+      document.getElementById('financialSummaryReport').textContent = `Receitas: R$ ${parseFloat(s.totalIncome || 0).toFixed(2)} | Despesas: R$ ${parseFloat(s.totalExpense || 0).toFixed(2)} | Lucro: R$ ${parseFloat(s.netProfit || 0).toFixed(2)} | Orcamentos em aberto: R$ ${parseFloat(s.outstandingBudgets || 0).toFixed(2)}`;
+      await loadBudgetReport();
+    }
+
+    async function loadIncomeExpenseReport() {
+      const s = document.getElementById('reportStartDate').value;
+      const e = document.getElementById('reportEndDate').value;
+      if (!s || !e) {
+        notify('Selecione data inicial e final', 'warning');
+        return;
+      }
+      const d = await apiGet(`/api/reports/income-expense?start_date=${s}&end_date=${e}`);
+      document.getElementById('financialSummaryReport').textContent = `Periodo ${s} a ${e} | Receitas: R$ ${parseFloat(d.income || 0).toFixed(2)} | Despesas: R$ ${parseFloat(d.expense || 0).toFixed(2)} | Liquido: R$ ${parseFloat((d.income || 0) - (d.expense || 0)).toFixed(2)}`;
+      await loadCategoryReport(s, e);
+    }
+
+    async function loadCashFlowReport() {
+      const y = new Date().getFullYear();
+      const rows = await apiGet(`/api/reports/cash-flow?year=${y}`);
+      const txt = (rows || []).map(r => `${r.month}: R$ ${parseFloat(r.net || 0).toFixed(2)}`).join(' | ');
+      document.getElementById('financialSummaryReport').textContent = txt || 'Sem fluxo de caixa para o ano.';
+    }
+
+    async function loadCategoryReport(startDate, endDate) {
+      const rows = await apiGet(`/api/reports/category?start_date=${startDate}&end_date=${endDate}`);
+      const tbody = document.querySelector('#categoryReportTable tbody');
+      tbody.innerHTML = '';
+      (rows || []).forEach(r => {
+        tbody.innerHTML += `<tr><td>${r.category || '-'}</td><td>${r.type || '-'}</td><td>${r.count || 0}</td><td>R$ ${parseFloat(r.total || 0).toFixed(2)}</td></tr>`;
+      });
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="4" class="muted">Sem dados.</td></tr>';
+    }
+
+    async function loadBudgetReport() {
+      const rows = await apiGet('/api/reports/budgets');
+      const tbody = document.querySelector('#budgetReportTable tbody');
+      tbody.innerHTML = '';
+      (rows || []).forEach(r => {
+        tbody.innerHTML += `<tr><td>${r.id}</td><td>${r.code || ''}</td><td>${r.client || ''}</td><td>${r.title || ''}</td><td>R$ ${parseFloat(r.total_value || 0).toFixed(2)}</td><td>R$ ${parseFloat(r.amount_paid || 0).toFixed(2)}</td><td>R$ ${parseFloat(r.remaining || 0).toFixed(2)}</td><td>${r.status || ''}</td><td>${parseFloat(r.percentage_paid || 0).toFixed(1)}%</td></tr>`;
+      });
+      if (!tbody.innerHTML) tbody.innerHTML = '<tr><td colspan="9" class="muted">Sem dados.</td></tr>';
+    }
+
+    function exportCategoryCSV() {
+      const s = document.getElementById('reportStartDate').value;
+      const e = document.getElementById('reportEndDate').value;
+      if (!s || !e) {
+        notify('Selecione data inicial e final', 'warning');
+        return;
+      }
+      window.location.href = `/api/reports/export/category?start_date=${s}&end_date=${e}`;
+    }
+
+    function exportBudgetCSV() {
+      window.location.href = '/api/reports/export/budgets';
+    }
+
+    function bindMenu() {
+      const map = {
+        'menu-dashboard': ['dashboard', loadSummary],
+        'menu-clients': ['clients', loadClients],
+        'menu-budgets': ['budgets', loadBudgets],
+        'menu-materials': ['materials', loadMaterials],
+        'menu-finance': ['finance', loadTxns],
+        'menu-service-orders': ['service-orders', loadServiceOrders],
+        'menu-receivables': ['receivables', loadReceivablesReport],
+        'menu-receipts': ['receipts', loadReceipts],
+        'menu-reminders': ['reminders', loadReminders],
+        'menu-reports': ['reports', loadFinancialSummaryReport]
+      };
+      Object.keys(map).forEach(id => {
+        const node = document.getElementById(id);
+        if (!node) return;
+        node.onclick = e => {
+          if (id === 'menu-appointments') return;
+          e.preventDefault();
+          show(map[id][0]);
+          runUiAction(() => map[id][1](), 'Erro ao carregar secao');
+        };
+      });
+    }
+
+    function bindServiceOrderActions() {
+      const table = document.getElementById('serviceOrderTable');
+      if (!table) return;
+
+      table.addEventListener('click', (e) => {
+        const agendaButton = e.target.closest('button[data-go-agenda][data-so-id]');
+        if (agendaButton) {
+          const soId = agendaButton.getAttribute('data-so-id');
+          const budgetId = agendaButton.getAttribute('data-budget-id') || '';
+          const params = new URLSearchParams();
+          if (soId) params.set('service_order_id', soId);
+          if (budgetId) params.set('budget_id', budgetId);
+          window.location.href = `/agenda?${params.toString()}`;
+          return;
+        }
+
+        const button = e.target.closest('button[data-so-id][data-so-status]');
+        if (!button) return;
+        const id = button.getAttribute('data-so-id');
+        const status = button.getAttribute('data-so-status');
+        runUiAction(() => updateServiceOrderStatus(id, status), 'Erro ao atualizar status da OS');
+      });
+
+      const filters = document.getElementById('serviceOrderFilters');
+      if (filters) {
+        filters.addEventListener('click', (e) => {
+          const button = e.target.closest('button[data-so-filter]');
+          if (!button) return;
+          setServiceOrderFilter(button.getAttribute('data-so-filter'));
+        });
+      }
+    }
+
+    function bindBudgetActions() {
+      const table = document.getElementById('budgetTable');
+      if (!table) return;
+
+      table.addEventListener('click', (e) => {
+        const button = e.target.closest('button[data-budget-action][data-budget-id]');
+        if (!button) return;
+
+        const budgetId = button.getAttribute('data-budget-id');
+        const action = button.getAttribute('data-budget-action');
+
+        if (action === 'create-os') {
+          runUiAction(async () => {
+            await apiGet(`/api/service-orders/from-budget/${budgetId}`, { method: 'POST' });
+            notify('OS criada (ou ja existente) para este orcamento', 'success');
+            await loadBudgets();
+            await loadServiceOrders();
+          }, 'Erro ao criar OS');
+          return;
+        }
+
+        if (action === 'close-budget') {
+          if (!confirm('Fechar este projeto agora? Esta acao conclui o orcamento.')) return;
+          runUiAction(async () => {
+            await apiGet(`/api/budgets/${budgetId}/close`, { method: 'POST' });
+            notify('Projeto concluido com sucesso', 'success');
+            await loadBudgets();
+            await loadServiceOrders();
+            await loadSummary();
+          }, 'Erro ao fechar projeto');
+          return;
+        }
+
+        if (action === 'go-agenda') {
+          const soId = button.getAttribute('data-so-id') || '';
+          const params = new URLSearchParams();
+          params.set('budget_id', budgetId);
+          if (soId) params.set('service_order_id', soId);
+          window.location.href = `/agenda?${params.toString()}`;
+          return;
+        }
+
+        if (action === 'open-os') {
+          show('service-orders');
+          runUiAction(() => loadServiceOrders(), 'Erro ao carregar ordens de servico');
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      bindMenu();
+      bindServiceOrderActions();
+      bindBudgetActions();
+      show('dashboard');
+      loadSummary();
+    });
+  </script>
+</body>
+</html>

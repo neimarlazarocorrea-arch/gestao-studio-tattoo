@@ -1,0 +1,23 @@
+<svg viewBox="0 0 768 768" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .logo-text { font-family: 'Georgia', serif; font-size: 480px; font-weight: bold; fill: #000; }
+      .logo-decor { fill: none; stroke: #000; stroke-width: 8; }
+    </style>
+  </defs>
+  
+  <!-- Decorative elements -->
+  <path d="M 150 200 Q 200 150 250 200 Q 200 250 150 200" class="logo-decor"/>
+  <path d="M 600 200 Q 650 150 700 200 Q 650 250 600 200" class="logo-decor"/>
+  <path d="M 150 550 Q 200 600 250 550 Q 200 500 150 550" class="logo-decor"/>
+  <path d="M 600 550 Q 650 600 700 550 Q 650 500 600 550" class="logo-decor"/>
+  
+  <!-- Main letters MN -->
+  <g>
+    <text x="150" y="500" class="logo-text">M</text>
+    <text x="420" y="500" class="logo-text">N</text>
+  </g>
+  
+  <!-- Center decorative line -->
+  <line x1="350" y1="100" x2="350" y2="700" stroke="#000" stroke-width="3" stroke-dasharray="5,5"/>
+</svg>

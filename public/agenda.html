@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda - Tattoo Studio Pro</title>
+  <link rel="stylesheet" href="/css/agenda.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">
+        <h1>Tattoo Studio Pro</h1>
+        <p>Agenda de agendamentos</p>
+      </div>
+      <a href="/" class="nav-link">Voltar ao painel</a>
+    </header>
+
+    <main>
+      <h2>Agenda</h2>
+
+      <form id="agendaForm" class="form-grid">
+        <input type="hidden" name="id" />
+
+        <label>Cliente
+          <select name="client_id" required></select>
+        </label>
+
+        <label>Orcamento (codigo)
+          <select name="budget_id">
+            <option value="">-- Sem orcamento --</option>
+          </select>
+        </label>
+
+        <label>Data
+          <input type="date" name="date" required />
+        </label>
+
+        <label>Hora
+          <input type="time" name="time" required />
+        </label>
+
+        <label>Duracao (min)
+          <input type="number" name="duration_min" min="1" placeholder="180" />
+        </label>
+
+        <label>Servico
+          <input type="text" name="service" required />
+        </label>
+
+        <label>Preco
+          <input type="number" step="0.01" name="price" />
+        </label>
+
+        <label>Status
+          <select name="status">
+            <option value="scheduled">Agendado</option>
+            <option value="done">Concluido</option>
+            <option value="canceled">Cancelado</option>
+          </select>
+        </label>
+
+        <label class="notes-field">Observacoes
+          <textarea name="notes" rows="3"></textarea>
+        </label>
+
+        <div class="form-buttons">
+          <button type="submit" class="primary">Salvar agendamento</button>
+          <button type="button" id="cancelEdit" class="warning">Cancelar</button>
+        </div>
+      </form>
+
+      <div class="filters">
+        <button id="filter-today" type="button">Hoje</button>
+        <button id="filter-week" type="button">Proximos 7 dias</button>
+        <button id="filter-all" type="button">Todos</button>
+      </div>
+
+      <div id="agendaContextBar" class="context-bar" hidden>
+        <span id="agendaContextText"></span>
+        <button id="clearAgendaContext" type="button" class="context-clear">Limpar filtro de contexto</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="agendaTable">
+          <thead>
+            <tr>
+              <th>ID</th><th>Cliente</th><th>Orcamento</th><th>OS</th><th>Data</th><th>Hora</th><th>Duracao</th><th>Servico</th><th>Preco</th><th>Status</th><th>Acoes</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/agenda.js"></script>
+</body>
+</html>
