@@ -436,7 +436,7 @@ function completeSession(appointmentId, materialsUsed, callback) {
 
 // cria nova sessão para próxima tatuagem no mesmo orçamento
 function createNextSession(budgetId, appointmentData, callback) {
-  // appointmentData deve conter: date, time, service, price, notes, duration_min
+  // os dados do agendamento devem conter: date, time, service, price, notes, duration_min
   // session_number será incrementado automaticamente
   
   db.get('SELECT MAX(session_number) as max_session FROM appointments WHERE budget_id = ?', [budgetId], (err, row) => {

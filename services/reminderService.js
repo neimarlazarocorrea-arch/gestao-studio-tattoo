@@ -82,7 +82,7 @@ function getPending(callback) {
   });
 }
 
-// atualiza status do lembrete (sent, skipped, etc)
+// atualiza o estado do lembrete (sent, skipped, etc)
 function updateStatus(id, status, sent_date, callback) {
   const sql = `UPDATE collection_reminders 
                SET status = ?, sent_date = ? 

@@ -1,4 +1,4 @@
-# Pasta views
+# Pasta de vistas
 
 Este diretorio fica reservado para templates do lado do servidor, caso o projeto evolua para um motor de templates (por exemplo, EJS ou Pug).
 

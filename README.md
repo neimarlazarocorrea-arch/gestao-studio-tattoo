@@ -1,6 +1,6 @@
 # Tattoo Gestao Pro
 
-Sistema de gestao para estudio de tatuagem com backend Node.js/Express, base de dados SQLite e frontend estatico.
+Sistema de gestao para estudio de tatuagem com servidor Node.js/Express, base de dados SQLite e interface estatica.
 
 ## Objetivo do projeto
 
@@ -44,9 +44,9 @@ Exemplo:
 ## Bloco de autenticacao (opcional)
 
 Quando `AUTH_ENABLED=true`:
-- o frontend apresenta `Entrar API` e `Sair API` no painel e na agenda;
+- a interface apresenta `Entrar API` e `Sair API` no painel e na agenda;
 - o login e feito em modal, com validacao no servidor antes de gravar credenciais;
-- quando uma chamada devolve `401`, o frontend pode pedir autenticacao e repetir a requisicao uma unica vez.
+- quando uma chamada devolve `401`, a interface pode pedir autenticacao e repetir a requisicao uma unica vez.
 
 ## Bloco de scripts operacionais
 
@@ -63,10 +63,10 @@ As rotas em `/api/*` seguem envelope padrao:
 - sucesso: `{ "ok": true, "data": ... }`
 - erro: `{ "ok": false, "error": "..." }`
 
-Este bloco facilita o tratamento uniforme de respostas no frontend.
+Este bloco facilita o tratamento uniforme de respostas na interface.
 
 ## Bloco de repositorio
 
 - `node_modules/` e `db/*.db` estao ignorados no git;
 - o esquema principal esta em `db/schema.sql`;
-- alteracoes de backend/frontend devem ser validadas com `npm run smoke:e2e`.
+- alteracoes de servidor/interface devem ser validadas com `npm run smoke:e2e`.

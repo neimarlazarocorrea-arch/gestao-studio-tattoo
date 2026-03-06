@@ -14,15 +14,15 @@
 - Documentacao de configuracao/operacao em `README.md` e exemplo de ambiente em `.env.example`.
 
 ### Alterado
-- Frontend passou a consumir API por utilitario centralizado (`public/js/api.js`) com tratamento de erro uniforme.
+- A interface passou a consumir API por utilitario centralizado (`public/js/api.js`) com tratamento de erro uniforme.
 - Agenda redesenhada e alinhada visualmente com o painel principal.
-- UX de autenticacao aprimorada no frontend:
+- UX de autenticacao aprimorada na interface:
   - menu/botao Entrar API/Sair API no painel e agenda;
   - modal de login com validacao de credencial no servidor;
   - erro inline no modal com limpeza automatica ao editar campos;
   - sincronizacao global de estado de autenticacao entre telas;
   - repeticao unica apos `401` quando aplicavel.
-- KPI de ciclo medio de OS movido para backend e exibido em painel/relatorios.
+- KPI de ciclo medio de OS movido para o servidor e exibido em painel/relatorios.
 - Exportacao CSV de resumo gerencial adicionada em relatorios.
 
 ### Corrigido

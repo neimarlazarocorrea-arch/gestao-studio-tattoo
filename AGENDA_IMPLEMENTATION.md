@@ -14,10 +14,10 @@ Implementacao:
 - tabela `appointments` em `db/schema.sql`;
 - indices para consultas mais frequentes (por data, estado e relacoes).
 
-## Bloco 2: Service (regra de negocio)
+## Bloco 2: Servico (regra de negocio)
 
 Objetivo:
-- centralizar as regras da Agenda fora do controller.
+- centralizar as regras da Agenda fora do controlador.
 
 Implementacao:
 - `services/appointmentService.js` com:
@@ -27,7 +27,7 @@ Implementacao:
   - contagem de hoje (`countToday`);
   - conclusao de sessao e ligacao a fluxo financeiro/OS quando aplicavel.
 
-## Bloco 3: Controller (camada HTTP)
+## Bloco 3: Controlador (camada HTTP)
 
 Objetivo:
 - validar pedidos e devolver respostas no contrato da API.
@@ -35,7 +35,7 @@ Objetivo:
 Implementacao:
 - `controllers/appointmentController.js`:
   - valida campos obrigatorios;
-  - chama service;
+  - chama o servico;
   - devolve sucesso/erro no formato esperado.
 
 ## Bloco 4: Rotas
@@ -57,7 +57,7 @@ Implementacao:
 - registo de rotas no servidor;
 - endpoint/pagina `GET /agenda` para abrir `public/agenda.html`.
 
-## Bloco 6: Frontend da Agenda
+## Bloco 6: Interface da Agenda
 
 Objetivo:
 - permitir operacao diaria sem sair da pagina.
@@ -83,7 +83,7 @@ Implementacao:
 ## Bloco 8: Contrato de API
 
 Objetivo:
-- padronizar respostas para facilitar frontend e testes.
+- padronizar respostas para facilitar interface e testes.
 
 Formato:
 - sucesso: `{ ok: true, data: ... }`
